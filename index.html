@@ -49,7 +49,7 @@
 
         .banner-img {
             width: 100%;
-            max-height: 300px;
+            max-height: 180px;
             object-fit: cover;
             border-radius: 8px;
             border: 1px solid var(--border-color);
@@ -279,7 +279,7 @@
     <div class="subtitle">3. Liga — Torschützen, Spielplan & Tabelle</div>
     <div style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 15px;">⚡ Web-App & Management: Jürgen Schützendorf</div>
 
-    <!-- TORSCHÜTZEN-TABELLE MSV DUISBURG -->
+    <!-- TORSCHÜTZEN-TABELLE MSV DUISBURG (ZIEHT SICH AUTOMATISCH DIE TORE AUS DEN SPIELEN) -->
     <div class="section-box">
         <div class="section-header">MSV Duisburg — Torschützenliste</div>
         <div class="table-container">
@@ -292,7 +292,7 @@
                     </tr>
                 </thead>
                 <tbody id="scorerTableBody">
-                    <!-- Wird aus msv_torschuetzen geladen -->
+                    <!-- Wird automatisch berechnet -->
                 </tbody>
             </table>
         </div>
@@ -361,17 +361,6 @@
         </div>
         <div id="matchInputsContainer"></div>
         <button class="btn" onclick="saveAllMatches()">Ergebnisse & Torschützen speichern</button>
-
-        <!-- Torschützen-Tabelle verwalten -->
-        <div style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 15px;">
-            <div style="font-weight: bold; color: var(--msv-bright-blue); margin-bottom: 10px; font-size: 0.85rem;">⚽ MSV Torschützen (Datenbank-Tabelle) verwalten</div>
-            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                <input type="text" id="newScorerName" class="form-control" placeholder="Spielername">
-                <input type="number" id="newScorerGoals" class="form-control" placeholder="Tore" style="width: 80px;" min="1" value="1">
-                <button class="btn" style="width: 140px; margin-top: 0;" onclick="addOrUpdateScorer()">Hinzufügen</button>
-            </div>
-            <div id="adminScorerList" style="font-size: 0.8rem; color: var(--text-muted);"></div>
-        </div>
     </div>
 
     <!-- ADMIN SCHALTER UNTEN -->
@@ -388,7 +377,7 @@
     const SUPABASE_ANON_KEY = 'sb_publishable_yXEueWILvAq-Vm2VfTuYyg_BIQeE1KK';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const ADMIN_PIN = "1919"; // MSV Gründungsjahr
+    const ADMIN_PIN = "1902"; // MSV Gründungsjahr
     let isAdmin = false;
     let currentMatchday = 1;
     let matchdayInitialized = false;
@@ -402,10 +391,8 @@
     ];
 
     let allMatchesFromDB = [];
-    let msvScorersFromDB = [];
 
     async function loadDataFromDB() {
-        // 1. Spiele laden
         let { data: matchData, error: matchError } = await supabaseClient
             .from('msv_spiele')
             .select('*')
@@ -414,29 +401,17 @@
         if (!matchError) {
             allMatchesFromDB = matchData || [];
             
-            // Automatisch den aktuellen Spieltag beim ersten Laden anhand des Datums bestimmen
             if (!matchdayInitialized && allMatchesFromDB.length > 0) {
                 determineCurrentMatchday();
                 matchdayInitialized = true;
             }
         }
 
-        // 2. Torschützen laden
-        let { data: scorerData, error: scorerError } = await supabaseClient
-            .from('msv_torschuetzen')
-            .select('*')
-            .order('tore', { ascending: false });
-
-        if (!scorerError) {
-            msvScorersFromDB = scorerData || [];
-        }
-
         renderAll();
     }
 
-    // Funktion zur automatischen Erkennung des aktuellen Spieltags basierend auf dem heutigen Datum
     function determineCurrentMatchday() {
-        const today = new Date().toISOString().split('T')[0]; // Format "YYYY-MM-DD"
+        const today = new Date().toISOString().split('T')[0];
         let closestMatchday = 1;
         let minDiff = Infinity;
 
@@ -487,10 +462,7 @@
         renderMatchdayTable();
         renderTable();
         renderScorerTable();
-        if (isAdmin) {
-            renderInputForm();
-            renderAdminScorerList();
-        }
+        if (isAdmin) renderInputForm();
     }
 
     function renderMatchdayTable() {
@@ -598,21 +570,48 @@
         });
     }
 
+    // Zieht sich die MSV-Torschützen vollautomatisch aus den eingetragenen Spielen
     function renderScorerTable() {
         let tbody = document.getElementById('scorerTableBody');
         tbody.innerHTML = '';
 
-        if (msvScorersFromDB.length === 0) {
+        let goalCounts = {};
+
+        allMatchesFromDB.forEach(m => {
+            if (m.tore_schuetzen && (m.heim_team === "MSV Duisburg" || m.gast_team === "MSV Duisburg")) {
+                let parts = m.tore_schuetzen.split(',');
+                parts.forEach(part => {
+                    let cleaned = part.trim();
+                    if (!cleaned) return;
+                    
+                    let match = cleaned.match(/(.*?)\s*\((\d+)\)$/);
+                    let name = cleaned;
+                    let count = 1;
+
+                    if (match) {
+                        name = match[1].trim();
+                        count = parseInt(match[2]);
+                    }
+
+                    goalCounts[name] = (goalCounts[name] || 0) + count;
+                });
+            }
+        });
+
+        let scorersArray = Object.entries(goalCounts).map(([name, goals]) => ({ name, goals }));
+        scorersArray.sort((a, b) => b.goals - a.goals);
+
+        if (scorersArray.length === 0) {
             tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 15px;">Noch keine Torschützen eingetragen.</td></tr>`;
             return;
         }
 
-        msvScorersFromDB.forEach((s, idx) => {
+        scorersArray.forEach((s, idx) => {
             let tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><strong>${idx + 1}.</strong></td>
-                <td>${s.spieler_name}</td>
-                <td style="text-align: center; font-weight: bold; color: var(--msv-bright-blue);">${s.tore}</td>
+                <td>${s.name}</td>
+                <td style="text-align: center; font-weight: bold; color: var(--msv-bright-blue);">${s.goals}</td>
             `;
             tbody.appendChild(tr);
         });
@@ -657,69 +656,12 @@
                     </div>
                 </div>
                 <div class="form-group form-grid-scorers">
-                    <label>Torschützen im Spiel (Anzeige)</label>
-                    <input type="text" id="sc_${m.id}" class="form-control" value="${m.tore_schuetzen || ''}" placeholder="z.B. Meier (2), Müller">
+                    <label>MSV Torschützen (z.B. Meier (2), Müller)</label>
+                    <input type="text" id="sc_${m.id}" class="form-control" value="${m.tore_schuetzen || ''}" placeholder="Namen hier eingeben...">
                 </div>
             `;
             container.appendChild(card);
         });
-    }
-
-    function renderAdminScorerList() {
-        let container = document.getElementById('adminScorerList');
-        container.innerHTML = '';
-        if (msvScorersFromDB.length === 0) {
-            container.innerHTML = "Keine Spieler in der Tabelle erfasst.";
-            return;
-        }
-        msvScorersFromDB.forEach(s => {
-            container.innerHTML += `<div>• ${s.spieler_name}: <strong>${s.tore} Tore</strong> <button onclick="removeScorer(${s.id})" style="background:none; border:none; color:var(--accent-red); cursor:pointer; margin-left:10px;">[Löschen]</button></div>`;
-        });
-    }
-
-    async function addOrUpdateScorer() {
-        let name = document.getElementById('newScorerName').value.trim();
-        let goalsToAdd = parseInt(document.getElementById('newScorerGoals').value);
-
-        if (!name || isNaN(goalsToAdd)) {
-            alert("Bitte gültigen Namen und Tore angeben.");
-            return;
-        }
-
-        let existing = msvScorersFromDB.find(s => s.spieler_name.toLowerCase() === name.toLowerCase());
-
-        if (existing) {
-            let newTotal = existing.tore + goalsToAdd;
-            let { error } = await supabaseClient
-                .from('msv_torschuetzen')
-                .update({ tore: newTotal })
-                .eq('id', existing.id);
-
-            if (error) alert("Fehler beim Aktualisieren.");
-        } else {
-            let { error } = await supabaseClient
-                .from('msv_torschuetzen')
-                .insert([{ spieler_name: name, tore: goalsToAdd }]);
-
-            if (error) alert("Fehler beim Hinzufügen.");
-        }
-
-        document.getElementById('newScorerName').value = '';
-        document.getElementById('newScorerGoals').value = '1';
-        loadDataFromDB();
-    }
-
-    async function removeScorer(id) {
-        let { error } = await supabaseClient
-            .from('msv_torschuetzen')
-            .delete()
-            .eq('id', id);
-
-        if (error) {
-            alert("Fehler beim Löschen.");
-        } else {
-            loadDataFromDB();
-        }
     }
 
     async function saveAllMatches() {
