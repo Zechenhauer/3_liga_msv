@@ -279,7 +279,7 @@
     <div class="subtitle">3. Liga — Torschützen, Spielplan & Tabelle</div>
     <div style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 15px;">⚡ Web-App & Management: Jürgen Schützendorf</div>
 
-    <!-- TORSCHÜTZEN-TABELLE MSV DUISBURG (ZIEHT SICH AUTOMATISCH DIE TORE AUS DEN SPIELEN) -->
+    <!-- TORSCHÜTZEN-TABELLE MSV DUISBURG -->
     <div class="section-box">
         <div class="section-header">MSV Duisburg — Torschützenliste</div>
         <div class="table-container">
@@ -488,7 +488,8 @@
                 ? `<strong>${m.tore_heim}:${m.tore_gast}</strong>` 
                 : `<span style="color: var(--text-muted); font-style: italic;">vs</span>`;
 
-            let scorersText = (m.tore_schuetzen && hasResult) ? `<div style="font-size: 0.75rem; color: var(--msv-bright-blue); margin-top: 3px;">⚽ ${m.tore_schuetzen}</div>` : '';
+            let isMsvMatch = (m.heim_team === "MSV Duisburg" || m.gast_team === "MSV Duisburg");
+            let scorersText = (isMsvMatch && m.tore_schuetzen && hasResult) ? `<div style="font-size: 0.75rem; color: var(--msv-bright-blue); margin-top: 3px;">⚽ ${m.tore_schuetzen}</div>` : '';
 
             let deleteBtn = isAdmin ? `<button class="btn-danger" onclick="deleteMatchResult(${m.id})" title="Ergebnis löschen">✕</button>` : '';
 
@@ -570,7 +571,7 @@
         });
     }
 
-    // Zieht sich die MSV-Torschützen vollautomatisch aus den eingetragenen Spielen
+    // Zieht sich die MSV-Torschützen vollautomatisch aus den eingetragenen MSV-Spielen
     function renderScorerTable() {
         let tbody = document.getElementById('scorerTableBody');
         tbody.innerHTML = '';
@@ -632,6 +633,15 @@
             let card = document.createElement('div');
             card.className = 'match-input-card';
 
+            let isMsvMatch = (m.heim_team === "MSV Duisburg" || m.gast_team === "MSV Duisburg");
+
+            let scorersInputHtml = isMsvMatch ? `
+                <div class="form-group form-grid-scorers">
+                    <label>MSV Torschützen (z.B. Meier (2), Müller)</label>
+                    <input type="text" id="sc_${m.id}" class="form-control" value="${m.tore_schuetzen || ''}" placeholder="Namen hier eingeben...">
+                </div>
+            ` : '';
+
             card.innerHTML = `
                 <div style="font-size: 0.8rem; color: #ffffff; font-weight: bold; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
                     <span>Spiel-ID: ${m.id}</span>
@@ -655,10 +665,7 @@
                         <input type="number" id="as_${m.id}" class="form-control" value="${m.tore_gast !== null && m.tore_gast !== undefined ? m.tore_gast : ''}" min="0">
                     </div>
                 </div>
-                <div class="form-group form-grid-scorers">
-                    <label>MSV Torschützen (z.B. Meier (2), Müller)</label>
-                    <input type="text" id="sc_${m.id}" class="form-control" value="${m.tore_schuetzen || ''}" placeholder="Namen hier eingeben...">
-                </div>
+                ${scorersInputHtml}
             `;
             container.appendChild(card);
         });
@@ -670,7 +677,8 @@
         for (let m of filteredMatches) {
             let hsVal = document.getElementById(`hs_${m.id}`).value;
             let asVal = document.getElementById(`as_${m.id}`).value;
-            let scVal = document.getElementById(`sc_${m.id}`).value.trim();
+            let scInput = document.getElementById(`sc_${m.id}`);
+            let scVal = scInput ? scInput.value.trim() : (m.tore_schuetzen || null);
 
             let newToreHeim = hsVal !== '' ? parseInt(hsVal) : null;
             let newToreGast = asVal !== '' ? parseInt(asVal) : null;
