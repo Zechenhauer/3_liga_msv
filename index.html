@@ -18,6 +18,7 @@
             --accent-green: #2ea043;
             --accent-red: #f85149;
             --msv-bright-blue: #58a6ff;
+            --msv-gold: #ffcc00;
         }
 
         * { box-sizing: border-box; }
@@ -108,6 +109,104 @@
             border-radius: 6px;
             margin-bottom: 15px;
             letter-spacing: 0.5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn-modal-open {
+            background: var(--msv-gold);
+            color: #0d1117;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: background 0.2s;
+        }
+        .btn-modal-open:hover { background: #ffdb4d; }
+
+        /* MODAL / POPUP STILE */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 15px;
+        }
+        .modal-card {
+            background: #161b22;
+            border: 1px solid var(--msv-bright-blue);
+            border-radius: 12px;
+            padding: 20px;
+            width: 100%;
+            max-width: 650px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .modal-body {
+            overflow-y: auto;
+            max-height: 70vh;
+        }
+
+        .msv-badge-win {
+            background: rgba(46, 160, 67, 0.25);
+            color: #3fb950;
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(46, 160, 67, 0.4);
+            font-weight: bold;
+        }
+        .msv-badge-draw {
+            background: rgba(227, 179, 64, 0.25);
+            color: #e3b341;
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(227, 179, 64, 0.4);
+            font-weight: bold;
+        }
+        .msv-badge-loss {
+            background: rgba(248, 81, 73, 0.25);
+            color: #f85149;
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(248, 81, 73, 0.4);
+            font-weight: bold;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+        .stat-card {
+            background: #161b22;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--msv-bright-blue);
+            margin-top: 4px;
+        }
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
         }
 
         .matchday-controls {
@@ -279,6 +378,15 @@
     <div class="subtitle">3. Liga — Torschützen, Spielplan & Tabelle</div>
     <div style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 15px;">⚡ Web-App & Management: Jürgen Schützendorf</div>
 
+    <!-- MSV DUISBURG — SAISON-AUSWERTUNG (ÜBER DER TORSCHÜTZEN-KACHEL) -->
+    <div class="section-box">
+        <div class="section-header">
+            <span>MSV Duisburg — Saison-Auswertung</span>
+            <button class="btn-modal-open" onclick="openMsvMatchesModal()">📅 Alle Spiele MSV</button>
+        </div>
+        <div class="stats-grid" id="msvStatsGrid"></div>
+    </div>
+
     <!-- TORSCHÜTZEN-TABELLE MSV DUISBURG -->
     <div class="section-box">
         <div class="section-header">MSV Duisburg — Torschützenliste</div>
@@ -369,6 +477,33 @@
     </div>
 </div>
 
+<!-- POPUP MODAL: ALLE SPIELE MSV DUISBURG -->
+<div class="modal-overlay" id="msvMatchesModal">
+    <div class="modal-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+            <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff;">📅 MSV Duisburg — Alle Saisonspiele</div>
+            <button class="btn-danger" onclick="closeMsvMatchesModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 50px; text-align: center;">ST</th>
+                            <th style="width: 90px;">Termin</th>
+                            <th style="text-align: right;">Heim</th>
+                            <th style="text-align: center; width: 70px;">Erg.</th>
+                            <th>Gast</th>
+                        </tr>
+                    </thead>
+                    <tbody id="msvMatchesModalBody"></tbody>
+                </table>
+            </div>
+        </div>
+        <button class="btn" style="margin-top: 15px;" onclick="closeMsvMatchesModal()">Schließen</button>
+    </div>
+</div>
+
 <script>
     // ==========================================
     // SUPABASE EINSTELLUNGEN
@@ -379,7 +514,20 @@
 
     const ADMIN_PIN = "1919"; // MSV Gründungsjahr
     let isAdmin = false;
-    let currentMatchday = 1;
+
+    // Gespeicherten Spieltag auslesen oder Standard 1
+    function getStoredMatchday() {
+        let savedDay = localStorage.getItem('msv_current_matchday');
+        if (savedDay) {
+            let parsed = parseInt(savedDay);
+            if (!isNaN(parsed) && parsed >= 1 && parsed <= 38) {
+                return parsed;
+            }
+        }
+        return 1;
+    }
+
+    let currentMatchday = getStoredMatchday();
     let matchdayInitialized = false;
 
     const teamsList = [
@@ -402,11 +550,15 @@
             allMatchesFromDB = matchData || [];
             
             if (!matchdayInitialized && allMatchesFromDB.length > 0) {
-                determineCurrentMatchday();
+                // Nur wenn kein localStorage gesetzt war, über das Datum ermitteln
+                if (!localStorage.getItem('msv_current_matchday')) {
+                    determineCurrentMatchday();
+                }
                 matchdayInitialized = true;
             }
         }
 
+        currentMatchday = getStoredMatchday();
         renderAll();
     }
 
@@ -429,6 +581,7 @@
         });
 
         currentMatchday = closestMatchday;
+        localStorage.setItem('msv_current_matchday', currentMatchday);
     }
 
     function toggleAdminMode() {
@@ -451,6 +604,7 @@
 
     function changeMatchday(amount) {
         currentMatchday = Math.max(1, Math.min(38, currentMatchday + amount));
+        localStorage.setItem('msv_current_matchday', currentMatchday);
         renderAll();
     }
 
@@ -462,6 +616,7 @@
         renderMatchdayTable();
         renderTable();
         renderScorerTable();
+        renderMsvStats();
         if (isAdmin) renderInputForm();
     }
 
@@ -569,6 +724,94 @@
             `;
             tbody.appendChild(tr);
         });
+    }
+
+    // MSV Saison-Auswertung Kacheln berechnen
+    function renderMsvStats() {
+        let played = 0, won = 0, draw = 0, lost = 0, goalsFor = 0, goalsAgainst = 0, points = 0;
+
+        allMatchesFromDB.forEach(m => {
+            let isHome = m.heim_team === "MSV Duisburg";
+            let isAway = m.gast_team === "MSV Duisburg";
+            if (!isHome && !isAway) return;
+
+            if (m.tore_heim !== null && m.tore_gast !== null) {
+                played++;
+                let myG = isHome ? m.tore_heim : m.tore_gast;
+                let oppG = isHome ? m.tore_gast : m.tore_heim;
+                goalsFor += myG;
+                goalsAgainst += oppG;
+
+                if (myG > oppG) { won++; points += 3; }
+                else if (myG === oppG) { draw++; points += 1; }
+                else { lost++; }
+            }
+        });
+
+        document.getElementById('msvStatsGrid').innerHTML = `
+            <div class="stat-card"><div class="stat-label">Spiele</div><div class="stat-value">${played}</div></div>
+            <div class="stat-card"><div class="stat-label">Siege</div><div class="stat-value" style="color: #3fb950;">${won}</div></div>
+            <div class="stat-card"><div class="stat-label">Remis</div><div class="stat-value" style="color: #e3b341;">${draw}</div></div>
+            <div class="stat-card"><div class="stat-label">Niederlagen</div><div class="stat-value" style="color: #f85149;">${lost}</div></div>
+            <div class="stat-card"><div class="stat-label">Tore</div><div class="stat-value">${goalsFor}:${goalsAgainst}</div></div>
+            <div class="stat-card"><div class="stat-label">Punkte</div><div class="stat-value">${points}</div></div>
+        `;
+    }
+
+    // Modal: Alle MSV Spiele anzeigen
+    function openMsvMatchesModal() {
+        let modalBody = document.getElementById('msvMatchesModalBody');
+        modalBody.innerHTML = '';
+
+        let msvMatches = allMatchesFromDB.filter(m => m.heim_team === "MSV Duisburg" || m.gast_team === "MSV Duisburg");
+        msvMatches.sort((a, b) => a.spieltag - b.spieltag);
+
+        if (msvMatches.length === 0) {
+            modalBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Keine Spiele gefunden.</td></tr>`;
+        } else {
+            msvMatches.forEach(m => {
+                let hasResult = m.tore_heim !== null && m.tore_gast !== null;
+                let isHome = m.heim_team === "MSV Duisburg";
+                
+                let badgeClass = '';
+                if (hasResult) {
+                    let msvGoals = isHome ? m.tore_heim : m.tore_gast;
+                    let oppGoals = isHome ? m.tore_gast : m.tore_heim;
+
+                    if (msvGoals > oppGoals) badgeClass = 'msv-badge-win';
+                    else if (msvGoals === oppGoals) badgeClass = 'msv-badge-draw';
+                    else badgeClass = 'msv-badge-loss';
+                }
+
+                let homeDisplay = m.heim_team;
+                let awayDisplay = m.gast_team;
+
+                if (isHome) {
+                    homeDisplay = `<span class="${badgeClass}">${m.heim_team}</span>`;
+                } else {
+                    awayDisplay = `<span class="${badgeClass}">${m.gast_team}</span>`;
+                }
+
+                let resultDisplay = hasResult ? `<strong>${m.tore_heim}:${m.tore_gast}</strong>` : `<span style="color:var(--text-muted);">-:-</span>`;
+                let formattedDate = m.datum ? m.datum.split('-').reverse().join('.') : 'Offen';
+
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="text-align: center; color: var(--msv-bright-blue); font-weight: bold;">ST ${m.spieltag}</td>
+                    <td style="font-size: 0.8rem; color: var(--text-muted);">${formattedDate}</td>
+                    <td style="text-align: right;">${homeDisplay}</td>
+                    <td style="text-align: center;">${resultDisplay}</td>
+                    <td>${awayDisplay}</td>
+                `;
+                modalBody.appendChild(tr);
+            });
+        }
+
+        document.getElementById('msvMatchesModal').style.display = 'flex';
+    }
+
+    function closeMsvMatchesModal() {
+        document.getElementById('msvMatchesModal').style.display = 'none';
     }
 
     // Zieht sich die MSV-Torschützen vollautomatisch aus den eingetragenen MSV-Spielen
@@ -708,6 +951,14 @@
             alert("Fehler beim Löschen des Ergebnisses.");
         } else {
             loadDataFromDB();
+        }
+    }
+
+    // Modal per Klick außerhalb schließen
+    window.onclick = function(e) {
+        let modal = document.getElementById('msvMatchesModal');
+        if (e.target === modal) {
+            closeMsvMatchesModal();
         }
     }
 
