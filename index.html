@@ -102,6 +102,7 @@
             justify-content: center;
             gap: 15px;
             flex-wrap: wrap;
+            align-items: center;
         }
 
         .api-badge {
@@ -320,7 +321,7 @@
     <div class="subtitle">3. Liga — Spielplan, Live-Tabelle & Ergebnisse via OpenLigaDB</div>
     <div class="meta-info">
         <span>⚡ Web-App & Management: Jürgen Schützendorf</span>
-        <span class="api-badge">● OpenLigaDB aktiv</span>
+        <span class="api-badge">● Live-Auto-Refresh (60s)</span>
         <button class="matchday-btn" onclick="fetchAllData(true)" style="padding: 2px 8px; font-size: 0.75rem;" title="Daten sofort neu laden">🔄 Aktualisieren</button>
     </div>
 
@@ -412,9 +413,10 @@
 </div>
 
 <script>
-    let currentMatchday = parseInt(localStorage.getItem('msv_current_matchday')) || 1;
+    let currentMatchday = 1;
     let openLigaMatches = {};
     let detailedGoalsCache = {};
+    let isInitialLoad = true;
 
     async function fetchAllData(showAlert = false) {
         try {
@@ -422,6 +424,10 @@
             let dataMatches = await resMatches.json();
 
             openLigaMatches = {};
+            let today = new Date();
+            let nearestMatchday = 1;
+            let minDateDiff = Infinity;
+
             if (Array.isArray(dataMatches)) {
                 dataMatches.forEach(match => {
                     let mDay = match.group && match.group.groupOrderID ? match.group.groupOrderID : 1;
@@ -451,6 +457,15 @@
                     let dateStr = match.matchDateTime ? match.matchDateTime.split('T')[0] : "";
                     let timeStr = !isNaN(matchDateObj.getTime()) ? matchDateObj.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : "14:00";
 
+                    // Finde den Spieltag, der dem heutigen Datum am nächsten liegt oder gerade läuft
+                    if (!isNaN(matchDateObj.getTime())) {
+                        let diff = Math.abs(matchDateObj - today);
+                        if (diff < minDateDiff) {
+                            minDateDiff = diff;
+                            nearestMatchday = mDay;
+                        }
+                    }
+
                     openLigaMatches[mDay].push({
                         matchID: match.matchID,
                         home: homeTeam,
@@ -462,6 +477,12 @@
                         isFinished: match.matchIsFinished
                     });
                 });
+            }
+
+            // Beim ersten Aufruf automatisch zum aktuellen/heutigen Spieltag springen
+            if (isInitialLoad) {
+                currentMatchday = nearestMatchday;
+                isInitialLoad = false;
             }
 
             if (showAlert) alert("Daten erfolgreich von OpenLigaDB aktualisiert!");
@@ -484,11 +505,12 @@
             if (Array.isArray(rawGoals)) {
                 rawGoals.forEach(g => {
                     let name = g.goalGetterName;
-                    let min = g.matchMinute ? `${g.matchMinute}. Min` : '';
-                    let scoreH = g.scoreTeam1 !== undefined && g.scoreTeam1 !== null ? g.scoreTeam1 : 0;
-                    let scoreA = g.scoreTeam2 !== undefined && g.scoreTeam2 !== null ? g.scoreTeam2 : 0;
+                    let min = (g.matchMinute !== undefined && g.matchMinute !== null) ? g.matchMinute : (g.minute !== undefined ? g.minute : '');
+                    let scoreH = g.scoreTeam1 !== undefined && g.scoreTeam1 !== null ? g.scoreTeam1 : (g.scoreGoal1 !== undefined ? g.scoreGoal1 : 0);
+                    let scoreA = g.scoreTeam2 !== undefined && g.scoreTeam2 !== null ? g.scoreTeam2 : (g.scoreGoal2 !== undefined ? g.scoreGoal2 : 0);
                     
-                    let goalText = name ? `⚽ ${name} (${min}) — <strong>${scoreH}:${scoreA}</strong>` : `⚽ Tor (${min}) — <strong>${scoreH}:${scoreA}</strong>`;
+                    let minStr = min !== '' ? `${min}. Min` : '';
+                    let goalText = name ? `⚽ ${name}${minStr ? ' (' + minStr + ')' : ''} — <strong>(${scoreH}:${scoreA})</strong>` : `⚽ Tor${minStr ? ' (' + minStr + ')' : ''} — <strong>(${scoreH}:${scoreA})</strong>`;
                     goalsList.push(goalText);
                 });
             }
@@ -501,7 +523,6 @@
 
     function changeMatchday(amount) {
         currentMatchday = Math.max(1, Math.min(38, currentMatchday + amount));
-        localStorage.setItem('msv_current_matchday', currentMatchday);
         renderAll();
     }
 
@@ -733,7 +754,7 @@
                     <td style="text-align: center; color: var(--msv-bright-blue); font-weight: bold;">ST ${m.matchday}</td>
                     <td style="font-size: 0.8rem; color: var(--text-muted);">${formattedDate}</td>
                     <td style="text-align: right;">${homeDisplay}</td>
-                    <td style="text-align: center;">${resultDisplay}</td>
+                    <td style="text-align: center;">${resultDialog}</td>
                     <td>${awayDisplay}</td>
                 `;
                 modalBody.appendChild(tr);
@@ -754,7 +775,13 @@
         }
     }
 
+    // Initialer Abruf beim Start
     fetchAllData();
+
+    // Auto-Refresh: Aktualisiert die App im Hintergrund alle 60 Sekunden für Live-Ergebnisse
+    setInterval(() => {
+        fetchAllData(false);
+    }, 60000);
 </script>
 
 </body>
