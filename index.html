@@ -546,7 +546,7 @@
     let currentMatchday = 1;
     let openLigaMatches = {};
     let detailedGoalsCache = {};
-    let previousScores = {}; // Speichert die letzten Stände zur automatischen Toraerkennung
+    let previousScores = {}; // Speichert die letzten Stände zur automatischen Tor-Erkennung
     let isInitialLoad = true;
 
     // VAPID Public Key Helper für Base64-Konvertierung
@@ -631,16 +631,21 @@
         }
     }
 
-    // Automatischer Push bei echtem Tor
-    async function triggerAutomaticGoalPush(home, away, hScore, aScore) {
+    // Automatischer Push bei echtem Tor inkl. Torschütze und Spielminute
+    async function triggerAutomaticGoalPush(home, away, hScore, aScore, scorerName = '', minute = '') {
         try {
+            let detail = scorerName ? 'Tor durch ' + scorerName : "Tor!";
+            if (minute) {
+                detail += ' (' + minute + '. Min)';
+            }
+
             await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
                 method: 'POST',
                 mode: 'cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     title: `⚽ TOR! (${hScore}:${aScore})`,
-                    body: `${home} vs ${away}`
+                    body: `${home} vs ${away} — ${detail}`
                 })
             });
             console.log(`Automatischer Tor-Alarm ausgelöst für ${home} vs ${away} (${hScore}:${aScore})`);
@@ -651,7 +656,7 @@
 
     // Live-Tor manuell simulieren (Test-Button)
     async function simulateLiveGoal() {
-        await triggerAutomaticGoalPush("MSV Duisburg", "Rot-Weiss Essen", 1, 0);
+        await triggerAutomaticGoalPush("MSV Duisburg", "Rot-Weiss Essen", 1, 0, "Alex Meier", "19");
         alert("Simuliertes Live-Tor gesendet! Die Push-Nachricht sollte gleich auf dem Handy erscheinen.");
     }
 
@@ -711,12 +716,16 @@
                         }
                     }
 
-                    // --- AUTOMATISCHE TOR-ERKENNUNG ---
+                    // --- AUTOMATISCHE TOR-ERKENNUNG MIT TORSCHÜTZE & MINUTE ---
                     if (homeScore !== null && awayScore !== null) {
                         let prev = previousScores[matchId];
                         if (prev !== undefined) {
                             if (homeScore > prev.home || awayScore > prev.away) {
-                                triggerAutomaticGoalPush(homeTeam, awayTeam, homeScore, awayScore);
+                                let lastGoalObj = (match.goals && match.goals.length > 0) ? match.goals[match.goals.length - 1] : null;
+                                let scorer = lastGoalObj ? lastGoalObj.goalGetterName : '';
+                                let min = lastGoalObj ? lastGoalObj.matchMinute : '';
+
+                                triggerAutomaticGoalPush(homeTeam, awayTeam, homeScore, awayScore, scorer, min);
                             }
                         }
                         previousScores[matchId] = { home: homeScore, away: awayScore };
