@@ -546,7 +546,7 @@
     let currentMatchday = 1;
     let openLigaMatches = {};
     let detailedGoalsCache = {};
-    let previousScores = {}; // Speichert die letzten Stände zur automatischen Tor-Erkennung
+    let previousScores = {}; 
     let isInitialLoad = true;
 
     // VAPID Public Key Helper für Base64-Konvertierung
@@ -561,7 +561,7 @@
         return outputArray;
     }
 
-    // Push Benachrichtigungen aktivieren und mit VAPID Key in Supabase speichern
+    // Push Benachrichtigungen aktivieren und mit VAPID Key in der MSV-Tabelle speichern
     async function requestPushPermission() {
         if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
             alert("Push-Benachrichtigungen werden von diesem Browser leider nicht unterstützt.");
@@ -588,7 +588,8 @@
             const p256dh = subscription.getKey('p256dh') ? btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh')))) : '';
             const auth = subscription.getKey('auth') ? btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth')))) : '';
 
-            const { error } = await supabaseClient.from('push_subscriptions').upsert({
+            // HIER AUF DIE NEUE MSV-TABELLE GEÄNDERT:
+            const { error } = await supabaseClient.from('push_subscriptions_msv').upsert({
                 endpoint: subscription.endpoint,
                 p256dh: p256dh,
                 auth: auth
@@ -598,7 +599,7 @@
                 console.error("Supabase Fehlerdetails:", error);
                 alert("Fehler in Supabase: " + error.message);
             } else {
-                alert("Push-Alarm erfolgreich aktiviert! Dein Gerät ist jetzt registriert.");
+                alert("Push-Alarm für MSV Duisburg erfolgreich aktiviert! Dein Gerät ist jetzt registriert.");
             }
 
         } catch (error) {
@@ -615,8 +616,8 @@
                 mode: 'cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    title: "⚽ Test-Tor-Alarm!",
-                    body: "Das Test-Tor wurde erfolgreich über die Edge Function ausgelöst!"
+                    title: "⚽ MSV Duisburg Test-Alarm",
+                    body: "Das Test-Tor für den MSV wurde erfolgreich über die Edge Function ausgelöst!"
                 })
             });
 
@@ -644,7 +645,7 @@
                 mode: 'cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    title: `⚽ TOR! (${hScore}:${aScore})`,
+                    title: `⚽ TOR FÜR MSV! (${hScore}:${aScore})`,
                     body: `${home} vs ${away} — ${detail}`
                 })
             });
@@ -1056,10 +1057,8 @@
         }
     }
 
-    // Initialer Abruf beim Start
     fetchAllData();
 
-    // Auto-Refresh: Aktualisiert die App im Hintergrund alle 60 Sekunden für Live-Ergebnisse & Push
     setInterval(() => {
         fetchAllData(false);
     }, 60000);
