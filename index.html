@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MSV Duisburg — 3. Liga Spielplan, Tabelle & Ergebnisse</title>
+    <!-- Supabase Client Bibliothek laden -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --bg-color: #0d1117;
@@ -114,6 +116,31 @@
             font-weight: 600;
         }
 
+        @keyframes pulse-red {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .live-badge {
+            display: none;
+            color: #ff7b72;
+            background: rgba(248, 81, 73, 0.15);
+            padding: 3px 10px;
+            border-radius: 4px;
+            border: 1px solid rgba(248, 81, 73, 0.4);
+            font-weight: bold;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #f85149;
+            border-radius: 50%;
+            animation: pulse-red 1.2s infinite;
+        }
+
         .section-box {
             background: #0d1117;
             border: 1px solid var(--border-color);
@@ -140,6 +167,26 @@
             flex-wrap: wrap;
             gap: 10px;
         }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .header-action-btn {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .header-action-btn:hover { background: rgba(0, 0, 0, 0.4); }
 
         .btn-modal-open {
             background: var(--msv-gold);
@@ -296,6 +343,50 @@
             background: rgba(0, 51, 153, 0.25);
         }
 
+        .admin-toggle-wrapper {
+            text-align: right;
+            margin-top: 15px;
+        }
+        .admin-toggle-btn {
+            background: transparent;
+            border: 1px dashed var(--border-color);
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .admin-toggle-btn:hover {
+            color: var(--msv-bright-blue);
+            border-color: var(--primary-blue);
+        }
+
+        .admin-card {
+            background: #161b22;
+            border: 1px solid var(--primary-blue);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .btn {
+            background: var(--primary-blue);
+            color: #ffffff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            width: 100%;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        .btn:hover { background: var(--primary-blue-hover); }
+
         .btn-danger {
             background: transparent;
             border: none;
@@ -322,19 +413,27 @@
     <div class="meta-info">
         <span>⚡ Web-App & Management: Jürgen Schützendorf</span>
         <span class="api-badge">● Live-Auto-Refresh (60s)</span>
-        <button class="matchday-btn" onclick="fetchAllData(true)" style="padding: 2px 8px; font-size: 0.75rem;" title="Daten sofort neu laden">🔄 Aktualisieren</button>
+        <div class="live-badge" id="liveIndicatorBadge"><span class="live-dot"></span> LIVE-SPIELE LÄUFT</div>
     </div>
 
     <div class="section-box">
         <div class="section-header">
             <span>MSV Duisburg — Saison-Auswertung</span>
-            <button class="btn-modal-open" onclick="openMsvMatchesModal()">📅 Alle Spiele MSV</button>
+            <div class="header-actions">
+                <button class="header-action-btn" onclick="requestPushPermission()">🔔 Push-Alarm</button>
+                <button class="btn-modal-open" onclick="openMsvMatchesModal()">📅 Alle Spiele MSV</button>
+            </div>
         </div>
         <div class="stats-grid" id="msvStatsGrid"></div>
     </div>
 
     <div class="section-box">
-        <div class="section-header" id="matchdayTableHeader">Spieltag 1 — Spiele & Ergebnisse</div>
+        <div class="section-header">
+            <span id="matchdayTableHeader">Spieltag 1 — Spiele & Ergebnisse</span>
+            <div class="header-actions">
+                <button class="header-action-btn" onclick="requestPushPermission()">🔔 Push-Alarm</button>
+            </div>
+        </div>
         <div class="matchday-controls">
             <button class="matchday-btn" onclick="changeMatchday(-1)">◀ Vorheriger Spieltag</button>
             <strong id="matchdayDisplay" style="color: var(--msv-bright-blue); font-size: 1.1rem;">Spieltag 1</strong>
@@ -358,7 +457,12 @@
     </div>
 
     <div class="section-box">
-        <div class="section-header">3. Liga Tabelle (Gesamt)</div>
+        <div class="section-header">
+            <span>3. Liga Tabelle (Gesamt)</span>
+            <div class="header-actions">
+                <button class="header-action-btn" onclick="requestPushPermission()">🔔 Push-Alarm</button>
+            </div>
+        </div>
         <div class="table-container">
             <table>
                 <thead>
@@ -383,6 +487,20 @@
             <div style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(46, 160, 67, 0.2); border-radius: 2px; display: inline-block;"></span> Aufstiegsplatz (2. Bundesliga)</div>
             <div style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(248, 81, 73, 0.2); border-radius: 2px; display: inline-block;"></span> Abstiegsplatz (Regionalliga)</div>
         </div>
+    </div>
+
+    <!-- ADMIN BEREICH -->
+    <div class="admin-card" id="adminCard">
+        <div style="font-weight: bold; color: var(--msv-bright-blue); margin-bottom: 12px; text-transform: uppercase; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
+            <span>✏️ Admin-Testbereich</span>
+            <span style="font-size: 0.7rem; color: #3fb950;">● Admin-Modus Aktiv</span>
+        </div>
+        <button class="btn" style="background: #238636;" onclick="sendTestPush()">🚀 Test-Push Benachrichtigung senden</button>
+        <button class="btn" style="background: #e3b341; color: #0d1117;" onclick="simulateLiveGoal()">⚡ Live-Tor simulieren (Test)</button>
+    </div>
+
+    <div class="admin-toggle-wrapper">
+        <button class="admin-toggle-btn" onclick="toggleAdminMode()">⚙️ Admin-Zugang</button>
     </div>
 </div>
 
@@ -413,10 +531,140 @@
 </div>
 
 <script>
+    const SUPABASE_URL = 'https://lhusylpjnujlqomougmg.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_yXEueWILvAq-Vm2VfTuYyg_BIQeE1KK';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const ADMIN_PIN = "1919";
+    let isAdmin = false;
+
     let currentMatchday = 1;
     let openLigaMatches = {};
     let detailedGoalsCache = {};
+    let previousScores = {}; // Speichert die letzten Stände zur automatischen Toraerkennung
     let isInitialLoad = true;
+
+    // VAPID Public Key Helper für Base64-Konvertierung
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+    }
+
+    // Push Benachrichtigungen aktivieren und mit VAPID Key in Supabase speichern
+    async function requestPushPermission() {
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+            alert("Push-Benachrichtigungen werden von diesem Browser leider nicht unterstützt.");
+            return;
+        }
+        
+        try {
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') {
+                alert("Die Berechtigung für Benachrichtigungen wurde verweigert.");
+                return;
+            }
+
+            const registration = await navigator.serviceWorker.register('./sw.js');
+            await registration.ready;
+
+            const publicVapidKey = 'BAsnfWgySLti5LzulXfN-xI-x7UDV32LO98YXgg1qdoRY1E1Tl05QPgCvOMgfwe80cSv_K7336-dhJTgBkHUI70';
+            
+            const subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
+            });
+
+            const p256dh = subscription.getKey('p256dh') ? btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh')))) : '';
+            const auth = subscription.getKey('auth') ? btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth')))) : '';
+
+            const { error } = await supabaseClient.from('push_subscriptions').upsert({
+                endpoint: subscription.endpoint,
+                p256dh: p256dh,
+                auth: auth
+            }, { onConflict: 'endpoint' });
+
+            if (error) {
+                console.error("Supabase Fehlerdetails:", error);
+                alert("Fehler in Supabase: " + error.message);
+            } else {
+                alert("Push-Alarm erfolgreich aktiviert! Dein Gerät ist jetzt registriert.");
+            }
+
+        } catch (error) {
+            console.error('Fehler bei der Push-Registrierung:', error);
+            alert("Fehler beim Aktivieren der Benachrichtigung: " + error.message);
+        }
+    }
+
+    // Test-Push an die Supabase Edge Function senden
+    async function sendTestPush() {
+        try {
+            const response = await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
+                method: 'POST',
+                mode: 'cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: "⚽ Test-Tor-Alarm!",
+                    body: "Das Test-Tor wurde erfolgreich über die Edge Function ausgelöst!"
+                })
+            });
+
+            const textResponse = await response.text();
+            if (response.ok) {
+                alert("Test-Push erfolgreich ausgelöst! Gerät(e) sollten benachrichtigt werden.");
+            } else {
+                alert("Fehler von der Edge Function: " + textResponse);
+            }
+        } catch (e) {
+            alert("Netzwerkfehler: " + e.message);
+        }
+    }
+
+    // Automatischer Push bei echtem Tor
+    async function triggerAutomaticGoalPush(home, away, hScore, aScore) {
+        try {
+            await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
+                method: 'POST',
+                mode: 'cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: `⚽ TOR! (${hScore}:${aScore})`,
+                    body: `${home} vs ${away}`
+                })
+            });
+            console.log(`Automatischer Tor-Alarm ausgelöst für ${home} vs ${away} (${hScore}:${aScore})`);
+        } catch (e) {
+            console.error("Fehler beim automatischen Tor-Push:", e);
+        }
+    }
+
+    // Live-Tor manuell simulieren (Test-Button)
+    async function simulateLiveGoal() {
+        await triggerAutomaticGoalPush("MSV Duisburg", "Rot-Weiss Essen", 1, 0);
+        alert("Simuliertes Live-Tor gesendet! Die Push-Nachricht sollte gleich auf dem Handy erscheinen.");
+    }
+
+    function toggleAdminMode() {
+        const adminCard = document.getElementById('adminCard');
+        if (isAdmin) {
+            isAdmin = false;
+            adminCard.style.display = 'none';
+            return;
+        }
+        let enteredPin = prompt("Bitte Admin-PIN eingeben:");
+        if (enteredPin === ADMIN_PIN) {
+            isAdmin = true;
+            adminCard.style.display = 'block';
+        } else if (enteredPin !== null) {
+            alert("Falsche PIN!");
+        }
+    }
 
     async function fetchAllData(showAlert = false) {
         try {
@@ -427,14 +675,19 @@
             let today = new Date();
             let nearestMatchday = 1;
             let minDateDiff = Infinity;
+            let hasLiveMatches = false;
 
             if (Array.isArray(dataMatches)) {
                 dataMatches.forEach(match => {
+                    let isCurrentlyLive = !match.matchIsFinished && match.matchResults && match.matchResults.length > 0;
+                    if (isCurrentlyLive) hasLiveMatches = true;
+
                     let mDay = match.group && match.group.groupOrderID ? match.group.groupOrderID : 1;
                     if (!openLigaMatches[mDay]) openLigaMatches[mDay] = [];
 
                     let homeTeam = match.team1.teamName;
                     let awayTeam = match.team2.teamName;
+                    let matchId = 'bl3_' + match.matchID;
 
                     let homeScore = null;
                     let awayScore = null;
@@ -453,11 +706,21 @@
                         }
                     }
 
+                    // --- AUTOMATISCHE TOR-ERKENNUNG ---
+                    if (homeScore !== null && awayScore !== null) {
+                        let prev = previousScores[matchId];
+                        if (prev !== undefined) {
+                            if (homeScore > prev.home || awayScore > prev.away) {
+                                triggerAutomaticGoalPush(homeTeam, awayTeam, homeScore, awayScore);
+                            }
+                        }
+                        previousScores[matchId] = { home: homeScore, away: awayScore };
+                    }
+
                     let matchDateObj = new Date(match.matchDateTime);
                     let dateStr = match.matchDateTime ? match.matchDateTime.split('T')[0] : "";
                     let timeStr = !isNaN(matchDateObj.getTime()) ? matchDateObj.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : "14:00";
 
-                    // Finde den Spieltag, der dem heutigen Datum am nächsten liegt oder gerade läuft
                     if (!isNaN(matchDateObj.getTime())) {
                         let diff = Math.abs(matchDateObj - today);
                         if (diff < minDateDiff) {
@@ -479,7 +742,11 @@
                 });
             }
 
-            // Beim ersten Aufruf automatisch zum aktuellen/heutigen Spieltag springen
+            let liveBadge = document.getElementById('liveIndicatorBadge');
+            if (liveBadge) {
+                liveBadge.style.display = hasLiveMatches ? 'flex' : 'none';
+            }
+
             if (isInitialLoad) {
                 currentMatchday = nearestMatchday;
                 isInitialLoad = false;
@@ -754,7 +1021,7 @@
                     <td style="text-align: center; color: var(--msv-bright-blue); font-weight: bold;">ST ${m.matchday}</td>
                     <td style="font-size: 0.8rem; color: var(--text-muted);">${formattedDate}</td>
                     <td style="text-align: right;">${homeDisplay}</td>
-                    <td style="text-align: center;">${resultDialog}</td>
+                    <td style="text-align: center;">${resultDisplay}</td>
                     <td>${awayDisplay}</td>
                 `;
                 modalBody.appendChild(tr);
@@ -778,7 +1045,7 @@
     // Initialer Abruf beim Start
     fetchAllData();
 
-    // Auto-Refresh: Aktualisiert die App im Hintergrund alle 60 Sekunden für Live-Ergebnisse
+    // Auto-Refresh: Aktualisiert die App im Hintergrund alle 60 Sekunden für Live-Ergebnisse & Push
     setInterval(() => {
         fetchAllData(false);
     }, 60000);
