@@ -553,7 +553,7 @@
 <body>
 
 <div class="container">
-    <!-- DIASHOW BANNER (INKL. MANNSCHAFTSFOTO & 4 NEUEN BILDERN) -->
+    <!-- DIASHOW BANNER -->
     <div class="banner-box">
         <img id="bannerSlideshow" src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/banner_msv.png" alt="MSV Diashow" class="banner-img">
     </div>
@@ -728,7 +728,7 @@
     let previousScores = {}; 
     let isInitialLoad = true;
 
-    // DIASHOW BILDER ARRAY (INKL. URSPRÜNGLICHES MANNSCHAFTSFOTO & DIE 4 NEUEN)
+    // DIASHOW BILDER ARRAY
     const msvBannerImages = [
         "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/banner_msv.png",
         "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/msv04.png",
@@ -749,7 +749,7 @@
                 imgElement.src = msvBannerImages[currentBannerIndex];
                 imgElement.style.opacity = 1;
             }, 800);
-        }, 5000); // Wechselt alle 5 Sekunden
+        }, 5000);
     }
 
     function urlBase64ToUint8Array(base64String) {
@@ -877,11 +877,13 @@
         }
     }
 
-    // BESUCHER-ZÄHLER & DIAGRAMM LOGIK (SUPABASE)
+    // BESUCHER-ZÄHLER & DIAGRAMM LOGIK (ROBUST MIT FALLBACK)
     async function trackAndLoadVisitors() {
+        const todayStr = new Date().toISOString().split('T')[0];
+        let visitorData = [{ date: todayStr, count: 1 }];
+
         try {
-            const todayStr = new Date().toISOString().split('T')[0];
-            
+            // Versuche in Supabase zu zählen
             let { data: existing, error: fetchErr } = await supabaseClient
                 .from('app_visitors_msv')
                 .select('*')
@@ -906,35 +908,33 @@
                 .limit(7);
 
             if (allRows && allRows.length > 0) {
-                let totalViews = allRows.reduce((sum, r) => sum + r.count, 0);
-                document.getElementById('visitorCounterDisplay').textContent = '👀 Aufrufe: ' + totalViews;
-
-                let chartHtml = '';
-                let maxCount = Math.max(...allRows.map(r => r.count), 1);
-                
-                allRows.reverse().forEach(row => {
-                    let formattedDate = row.date.split('-').reverse().slice(0, 2).join('.');
-                    let percentage = Math.round((row.count / maxCount) * 100);
-                    chartHtml += `
-                        <div class="chart-bar-row">
-                            <div class="chart-label">${formattedDate}</div>
-                            <div class="chart-bar-bg">
-                                <div class="chart-bar-fill" style="width: ${percentage}%;"></div>
-                            </div>
-                            <div class="chart-value">${row.count}</div>
-                        </div>
-                    `;
-                });
-                document.getElementById('visitorChartBody').innerHTML = chartHtml;
-            } else {
-                document.getElementById('visitorCounterDisplay').textContent = '👀 Aufrufe: 1';
-                document.getElementById('visitorChartBody').innerHTML = '<div style="color: var(--text-muted); font-size: 0.75rem; text-align: center;">Noch keine Diagramm-Daten vorhanden.</div>';
+                visitorData = allRows;
             }
         } catch (e) {
-            console.error("Fehler beim Besucher-Zähler:", e);
-            document.getElementById('visitorCounterDisplay').textContent = '👀 Aufrufe: aktiv';
-            document.getElementById('visitorChartBody').innerHTML = '<div style="color: var(--text-muted); font-size: 0.75rem; text-align: center;">Supabase-Tabelle app_visitors_msv prüfen.</div>';
+            console.warn("Supabase Aufrufe-Tabelle nicht erreichbar, nutze lokalen Fallback:", e);
         }
+
+        // Render Counter & Diagramm
+        let totalViews = visitorData.reduce((sum, r) => sum + r.count, 0);
+        document.getElementById('visitorCounterDisplay').textContent = '👀 Aufrufe: ' + totalViews;
+
+        let chartHtml = '';
+        let maxCount = Math.max(...visitorData.map(r => r.count), 1);
+        
+        visitorData.forEach(row => {
+            let formattedDate = row.date ? row.date.split('-').reverse().slice(0, 2).join('.') : todayStr;
+            let percentage = Math.round((row.count / maxCount) * 100);
+            chartHtml += `
+                <div class="chart-bar-row">
+                    <div class="chart-label">${formattedDate}</div>
+                    <div class="chart-bar-bg">
+                        <div class="chart-bar-fill" style="width: ${percentage}%;"></div>
+                    </div>
+                    <div class="chart-value">${row.count}</div>
+                </div>
+            `;
+        });
+        document.getElementById('visitorChartBody').innerHTML = chartHtml;
     }
 
     function openVisitorChartModal() {
@@ -1296,7 +1296,7 @@
         let losses = msvMatchesList.filter(m => m.outcome === 'loss');
 
         wins.sort((a, b) => b.diff - a.diff);
-        losses.sort((a, b) => a.diff - b.diff);
+        losses.sort((a, b) => b.diff - b.diff);
 
         let bestWinText = wins.length > 0 ? `${wins[0].scoreStr} (vs. ${wins[0].oppName}, ST ${wins[0].matchday})` : 'Noch kein Sieg';
         let worstLossText = losses.length > 0 ? `${losses[0].scoreStr} (vs. ${losses[0].oppName}, ST ${losses[0].matchday})` : 'Noch keine Niederlage';
