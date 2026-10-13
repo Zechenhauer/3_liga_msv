@@ -81,6 +81,22 @@
             object-fit: contain;
         }
 
+        /* Mini-Logo für Tabellenzeilen */
+        .team-cell-content {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .team-cell-content.right {
+            justify-content: flex-end;
+        }
+        .team-mini-logo {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
         h2 {
             text-align: center;
             margin: 0;
@@ -260,30 +276,87 @@
             font-weight: bold;
         }
 
-        .stats-grid {
+        /* ERWEITERTE STATISTIK-KACHELN (WIE AUF DEM BILD) */
+        .stats-grid-top {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 10px;
-            margin-bottom: 5px;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        @media(max-width: 768px) {
+            .stats-grid-top { grid-template-columns: repeat(3, 1fr); }
         }
         .stat-card {
-            background: #161b22;
+            background: #11151c;
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            padding: 10px;
+            padding: 10px 5px;
             text-align: center;
         }
         .stat-value {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: bold;
-            color: var(--msv-bright-blue);
+            color: #ffffff;
             margin-top: 4px;
         }
         .stat-label {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: var(--text-muted);
             text-transform: uppercase;
         }
+
+        .stats-grid-bottom {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        @media(max-width: 600px) {
+            .stats-grid-bottom { grid-template-columns: 1fr; }
+        }
+        .stat-card-wide {
+            background: #11151c;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+        }
+        .stat-wide-value {
+            font-size: 0.95rem;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+
+        .form-row-box {
+            background: #11151c;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .form-badges-container {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .form-circle {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #ffffff;
+        }
+        .form-circle.win { background: #2ea043; }
+        .form-circle.draw { background: #e3b341; color: #0d1117; }
+        .form-circle.loss { background: #f85149; }
 
         .matchday-controls {
             display: flex;
@@ -330,6 +403,7 @@
             padding: 10px 8px;
             border-bottom: 1px solid var(--border-color);
             vertical-align: top;
+            white-space: nowrap;
         }
         tr:hover { background-color: rgba(255,255,255,0.02); }
 
@@ -348,10 +422,46 @@
             background: rgba(0, 51, 153, 0.25);
         }
 
-        .admin-toggle-wrapper {
-            text-align: right;
+        /* FUSSZEILE (UNTERE LEISTE) */
+        .footer-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-top: 15px;
+            gap: 10px;
+            flex-wrap: wrap;
         }
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .visitor-counter-badge {
+            background: #161b22;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .chart-modal-btn {
+            background: #161b22;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .chart-modal-btn:hover {
+            color: var(--msv-bright-blue);
+            border-color: var(--primary-blue);
+        }
+
         .admin-toggle-btn {
             background: transparent;
             border: 1px dashed var(--border-color);
@@ -400,6 +510,40 @@
             font-weight: bold;
             font-size: 1rem;
         }
+
+        /* DIAGRAMM STYLES */
+        .chart-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 0.75rem;
+        }
+        .chart-label {
+            width: 75px;
+            color: var(--text-muted);
+            text-align: right;
+        }
+        .chart-bar-bg {
+            flex: 1;
+            background: #21262d;
+            border-radius: 4px;
+            height: 18px;
+            overflow: hidden;
+            display: flex;
+        }
+        .chart-bar-fill {
+            background: var(--msv-bright-blue);
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        .chart-value {
+            width: 35px;
+            font-weight: bold;
+            color: #ffffff;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
@@ -421,15 +565,22 @@
         <div class="live-badge" id="liveIndicatorBadge"><span class="live-dot"></span> LIVE-SPIELE LÄUFT</div>
     </div>
 
+    <!-- SAISON-AUSWERTUNG WIE AUF DEM BEISPIELBILD -->
     <div class="section-box">
         <div class="section-header">
             <span>MSV Duisburg — Saison-Auswertung</span>
             <div class="header-actions">
                 <button class="header-action-btn" onclick="requestPushPermission()">🔔 Push-Alarm</button>
-                <button class="btn-modal-open" onclick="openMsvMatchesModal()">📅 Alle Spiele MSV</button>
+                <button class="btn-modal-open" onclick="openMsvMatchesModal()">📅 Alle Spiele</button>
             </div>
         </div>
-        <div class="stats-grid" id="msvStatsGrid"></div>
+
+        <div class="stats-grid-top" id="msvTopStatsGrid"></div>
+        <div class="stats-grid-bottom" id="msvBottomStatsGrid"></div>
+        <div class="form-row-box">
+            <span style="font-size: 0.8rem; font-weight: bold; color: var(--text-muted);">Formverlauf (letzte Spiele):</span>
+            <div class="form-badges-container" id="msvFormBadges"></div>
+        </div>
     </div>
 
     <div class="section-box">
@@ -504,11 +655,17 @@
         <button class="btn" style="background: #e3b341; color: #0d1117;" onclick="simulateLiveGoal()">⚡ Live-Tor simulieren (Test)</button>
     </div>
 
-    <div class="admin-toggle-wrapper">
+    <!-- FUSSZEILE -->
+    <div class="footer-row">
+        <div class="footer-left">
+            <div class="visitor-counter-badge" id="visitorCounterDisplay">👀 Aufrufe: ...</div>
+            <button class="chart-modal-btn" onclick="openVisitorChartModal()">📊 AUFRUF-DIAGRAMM</button>
+        </div>
         <button class="admin-toggle-btn" onclick="toggleAdminMode()">⚙️ Admin-Zugang</button>
     </div>
 </div>
 
+<!-- MSV SPIELE MODAL -->
 <div class="modal-overlay" id="msvMatchesModal">
     <div class="modal-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
@@ -535,6 +692,22 @@
     </div>
 </div>
 
+<!-- AUFRUF-DIAGRAMM MODAL -->
+<div class="modal-overlay" id="visitorChartModal">
+    <div class="modal-card" style="max-width: 500px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+            <div style="font-weight: bold; font-size: 1.1rem; color: var(--msv-bright-blue);">📊 Besucher-Vergleich (Aufruf-Diagramm)</div>
+            <button class="btn-danger" onclick="closeVisitorChartModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div id="visitorChartBody">
+                <div style="color: var(--text-muted); font-size: 0.8rem; text-align: center; padding: 15px;">Lade Diagramm...</div>
+            </div>
+        </div>
+        <button class="btn" style="margin-top: 15px;" onclick="closeVisitorChartModal()">Schließen</button>
+    </div>
+</div>
+
 <script>
     const SUPABASE_URL = 'https://lhusylpjnujlqomougmg.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_yXEueWILvAq-Vm2VfTuYyg_BIQeE1KK';
@@ -546,6 +719,7 @@
     let currentMatchday = 1;
     let openLigaMatches = {};
     let detailedGoalsCache = {};
+    let teamLogos = {};
     let previousScores = {}; 
     let isInitialLoad = true;
 
@@ -560,7 +734,6 @@
         return outputArray;
     }
 
-    // Push Benachrichtigungen aktivieren und in push_subscriptions_msv speichern
     async function requestPushPermission() {
         if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
             alert("Push-Benachrichtigungen werden von diesem Browser leider nicht unterstützt.");
@@ -587,7 +760,6 @@
             const p256dh = subscription.getKey('p256dh') ? btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh')))) : '';
             const auth = subscription.getKey('auth') ? btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth')))) : '';
 
-            // Speichern in push_subscriptions_msv:
             const { error } = await supabaseClient.from('push_subscriptions_msv').upsert({
                 endpoint: subscription.endpoint,
                 p256dh: p256dh,
@@ -607,7 +779,6 @@
         }
     }
 
-    // Test-Push spezifisch für die MSV-Tabelle via Edge Function
     async function sendTestPush() {
         try {
             const targetUrl = SUPABASE_URL + '/functions/v1/send-push';
@@ -651,7 +822,6 @@
                     body: `${home} vs ${away} — ${detail}`
                 })
             });
-            console.log(`Automatischer Tor-Alarm ausgelöst für ${home} vs ${away} (${hScore}:${aScore})`);
         } catch (e) {
             console.error("Fehler beim automatischen Tor-Push:", e);
         }
@@ -678,6 +848,74 @@
         }
     }
 
+    // BESUCHER-ZÄHLER & DIAGRAMM LOGIK (SUPABASE)
+    async function trackAndLoadVisitors() {
+        try {
+            const todayStr = new Date().toISOString().split('T')[0];
+            
+            let { data: existing, error: fetchErr } = await supabaseClient
+                .from('app_visitors_msv')
+                .select('*')
+                .eq('date', todayStr)
+                .single();
+
+            if (existing) {
+                await supabaseClient
+                    .from('app_visitors_msv')
+                    .update({ count: existing.count + 1 })
+                    .eq('date', todayStr);
+            } else {
+                await supabaseClient
+                    .from('app_visitors_msv')
+                    .insert([{ date: todayStr, count: 1 }]);
+            }
+
+            let { data: allRows } = await supabaseClient
+                .from('app_visitors_msv')
+                .select('*')
+                .order('date', { ascending: false })
+                .limit(7);
+
+            if (allRows && allRows.length > 0) {
+                let totalViews = allRows.reduce((sum, r) => sum + r.count, 0);
+                document.getElementById('visitorCounterDisplay').textContent = '👀 Aufrufe: ' + totalViews;
+
+                let chartHtml = '';
+                let maxCount = Math.max(...allRows.map(r => r.count), 1);
+                
+                allRows.reverse().forEach(row => {
+                    let formattedDate = row.date.split('-').reverse().slice(0, 2).join('.');
+                    let percentage = Math.round((row.count / maxCount) * 100);
+                    chartHtml += `
+                        <div class="chart-bar-row">
+                            <div class="chart-label">${formattedDate}</div>
+                            <div class="chart-bar-bg">
+                                <div class="chart-bar-fill" style="width: ${percentage}%;"></div>
+                            </div>
+                            <div class="chart-value">${row.count}</div>
+                        </div>
+                    `;
+                });
+                document.getElementById('visitorChartBody').innerHTML = chartHtml;
+            } else {
+                document.getElementById('visitorCounterDisplay').textContent = '👀 Aufrufe: 1';
+                document.getElementById('visitorChartBody').innerHTML = '<div style="color: var(--text-muted); font-size: 0.75rem; text-align: center;">Noch keine Diagramm-Daten vorhanden.</div>';
+            }
+        } catch (e) {
+            console.error("Fehler beim Besucher-Zähler:", e);
+            document.getElementById('visitorCounterDisplay').textContent = '👀 Aufrufe: aktiv';
+            document.getElementById('visitorChartBody').innerHTML = '<div style="color: var(--text-muted); font-size: 0.75rem; text-align: center;">Supabase-Tabelle app_visitors_msv prüfen.</div>';
+        }
+    }
+
+    function openVisitorChartModal() {
+        document.getElementById('visitorChartModal').style.display = 'flex';
+    }
+
+    function closeVisitorChartModal() {
+        document.getElementById('visitorChartModal').style.display = 'none';
+    }
+
     async function fetchAllData(showAlert = false) {
         try {
             let resMatches = await fetch('https://api.openligadb.de/getmatchdata/bl3/2026');
@@ -691,6 +929,13 @@
 
             if (Array.isArray(dataMatches)) {
                 dataMatches.forEach(match => {
+                    if (match.team1 && match.team1.teamName && match.team1.teamIconUrl) {
+                        teamLogos[match.team1.teamName.trim().toLowerCase()] = match.team1.teamIconUrl;
+                    }
+                    if (match.team2 && match.team2.teamName && match.team2.teamIconUrl) {
+                        teamLogos[match.team2.teamName.trim().toLowerCase()] = match.team2.teamIconUrl;
+                    }
+
                     let isCurrentlyLive = !match.matchIsFinished && match.matchResults && match.matchResults.length > 0;
                     if (isCurrentlyLive) hasLiveMatches = true;
 
@@ -746,6 +991,7 @@
 
                     openLigaMatches[mDay].push({
                         matchID: match.matchID,
+                        matchday: mDay,
                         home: homeTeam,
                         away: awayTeam,
                         date: dateStr,
@@ -803,6 +1049,28 @@
         }
     }
 
+    function getTeamHtml(teamName, alignRight = false, isHighlighted = false) {
+        let logoUrl = teamLogos[teamName.trim().toLowerCase()];
+        let logoHtml = logoUrl ? `<img src="${logoUrl}" alt="${teamName}" class="team-mini-logo">` : '';
+        let nameStyle = isHighlighted ? 'color: var(--msv-bright-blue); font-weight: bold;' : '';
+
+        if (alignRight) {
+            return `
+                <div class="team-cell-content right">
+                    <span style="${nameStyle}">${teamName}</span>
+                    ${logoHtml}
+                </div>
+            `;
+        } else {
+            return `
+                <div class="team-cell-content">
+                    ${logoHtml}
+                    <span style="${nameStyle}">${teamName}</span>
+                </div>
+            `;
+        }
+    }
+
     function changeMatchday(amount) {
         currentMatchday = Math.max(1, Math.min(38, currentMatchday + amount));
         renderAll();
@@ -833,8 +1101,8 @@
             let formattedDate = m.date ? m.date.split('-').reverse().join('.') : '-';
             let timeStr = m.time ? ` ${m.time} Uhr` : '';
             
-            let homeClass = m.home.includes("MSV Duisburg") ? 'msv-highlight' : '';
-            let awayClass = m.away.includes("MSV Duisburg") ? 'msv-highlight' : '';
+            let isHomeMSV = m.home.includes("MSV Duisburg");
+            let isAwayMSV = m.away.includes("MSV Duisburg");
 
             let resultDisplay = hasResult 
                 ? `<strong>${m.homeScore}:${m.awayScore}</strong>` 
@@ -857,9 +1125,9 @@
             let tr = document.createElement('tr');
             tr.innerHTML = `
                 <td style="font-size: 0.8rem; color: #ffffff; font-weight: 500;">${formattedDate}${timeStr}</td>
-                <td class="${homeClass}" style="text-align: right;">${m.home}</td>
+                <td style="text-align: right;">${getTeamHtml(m.home, true, isHomeMSV)}</td>
                 <td style="text-align: center;">${resultDisplay}${goalsHtml}</td>
-                <td class="${awayClass}">${m.away}</td>
+                <td>${getTeamHtml(m.away, false, isAwayMSV)}</td>
             `;
             tbody.appendChild(tr);
         }
@@ -935,10 +1203,17 @@
             if (s.name.includes("MSV Duisburg")) tr.classList.add('msv-team-row');
 
             let diff = s.goalsFor - s.goalsAgainst;
+            let logoUrl = teamLogos[s.name.trim().toLowerCase()];
+            let logoHtml = logoUrl ? `<img src="${logoUrl}" alt="${s.name}" class="team-mini-logo">` : '';
 
             tr.innerHTML = `
                 <td><strong>${idx + 1}.</strong></td>
-                <td>${s.name}</td>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        ${logoHtml}
+                        <span>${s.name}</span>
+                    </div>
+                </td>
                 <td style="text-align: center;">${s.played}</td>
                 <td style="text-align: center;">${s.won}</td>
                 <td style="text-align: center;">${s.draw}</td>
@@ -953,6 +1228,7 @@
 
     function renderMsvStats() {
         let played = 0, won = 0, draw = 0, lost = 0, goalsFor = 0, goalsAgainst = 0, points = 0;
+        let msvMatchesList = [];
 
         Object.values(openLigaMatches).forEach(matchList => {
             if (!Array.isArray(matchList)) return;
@@ -968,14 +1244,37 @@
                     goalsFor += myG;
                     goalsAgainst += oppG;
 
-                    if (myG > oppG) { won++; points += 3; }
-                    else if (myG === oppG) { draw++; points += 1; }
+                    let outcome = 'loss';
+                    if (myG > oppG) { won++; points += 3; outcome = 'win'; }
+                    else if (myG === oppG) { draw++; points += 1; outcome = 'draw'; }
                     else { lost++; }
+
+                    let oppName = isHome ? m.away : m.home;
+                    msvMatchesList.push({
+                        matchday: m.matchday,
+                        myGoals: myG,
+                        oppGoals: oppG,
+                        diff: myG - oppG,
+                        scoreStr: `${myG}:${oppG}`,
+                        oppName: oppName,
+                        outcome: outcome
+                    });
                 }
             });
         });
 
-        document.getElementById('msvStatsGrid').innerHTML = `
+        // Bester Sieg & Höchste Schlappe ermitteln
+        let wins = msvMatchesList.filter(m => m.outcome === 'win');
+        let losses = msvMatchesList.filter(m => m.outcome === 'loss');
+
+        wins.sort((a, b) => b.diff - a.diff);
+        losses.sort((a, b) => a.diff - b.diff); // Negativster Diff zuerst
+
+        let bestWinText = wins.length > 0 ? `${wins[0].scoreStr} (vs. ${wins[0].oppName}, ST ${wins[0].matchday})` : 'Noch kein Sieg';
+        let worstLossText = losses.length > 0 ? `${losses[0].scoreStr} (vs. ${losses[0].oppName}, ST ${losses[0].matchday})` : 'Noch keine Niederlage';
+
+        // Top Kacheln (6 Stück wie auf dem Bild)
+        document.getElementById('msvTopStatsGrid').innerHTML = `
             <div class="stat-card"><div class="stat-label">Spiele</div><div class="stat-value">${played}</div></div>
             <div class="stat-card"><div class="stat-label">Siege</div><div class="stat-value" style="color: #3fb950;">${won}</div></div>
             <div class="stat-card"><div class="stat-label">Remis</div><div class="stat-value" style="color: #e3b341;">${draw}</div></div>
@@ -983,6 +1282,32 @@
             <div class="stat-card"><div class="stat-label">Tore</div><div class="stat-value">${goalsFor}:${goalsAgainst}</div></div>
             <div class="stat-card"><div class="stat-label">Punkte</div><div class="stat-value">${points}</div></div>
         `;
+
+        // Bottom Kacheln (Bester Sieg & Höchste Schlappe)
+        document.getElementById('msvBottomStatsGrid').innerHTML = `
+            <div class="stat-card-wide">
+                <div class="stat-label">Bester Sieg</div>
+                <div class="stat-wide-value" style="color: #3fb950;">${bestWinText}</div>
+            </div>
+            <div class="stat-card-wide">
+                <div class="stat-label">Höchste Schlappe</div>
+                <div class="stat-wide-value" style="color: #f85149;">${worstLossText}</div>
+            </div>
+        `;
+
+        // Formverlauf (letzte Spiele)
+        let formContainer = document.getElementById('msvFormBadges');
+        if (msvMatchesList.length === 0) {
+            formContainer.innerHTML = '<span style="font-size: 0.75rem; color: var(--text-muted);">Noch keine Spiele absolviert.</span>';
+        } else {
+            let badgesHtml = '';
+            msvMatchesList.slice(-12).forEach(m => {
+                let cls = m.outcome === 'win' ? 'win' : (m.outcome === 'draw' ? 'draw' : 'loss');
+                let letter = m.outcome === 'win' ? 'S' : (m.outcome === 'draw' ? 'U' : 'N');
+                badgesHtml += `<div class="form-circle ${cls}" title="ST ${m.matchday}: ${m.scoreStr} vs ${m.oppName}">${letter}</div>`;
+            });
+            formContainer.innerHTML = badgesHtml;
+        }
     }
 
     function openMsvMatchesModal() {
@@ -1035,9 +1360,9 @@
                 tr.innerHTML = `
                     <td style="text-align: center; color: var(--msv-bright-blue); font-weight: bold;">ST ${m.matchday}</td>
                     <td style="font-size: 0.8rem; color: var(--text-muted);">${formattedDate}</td>
-                    <td style="text-align: right;">${homeDisplay}</td>
+                    <td style="text-align: right;">${getTeamHtml(homeDisplay, true)}</td>
                     <td style="text-align: center;">${resultDisplay}</td>
-                    <td>${awayDisplay}</td>
+                    <td>${getTeamHtml(awayDisplay, false)}</td>
                 `;
                 modalBody.appendChild(tr);
             });
@@ -1051,12 +1376,14 @@
     }
 
     window.onclick = function(e) {
-        let modal = document.getElementById('msvMatchesModal');
-        if (e.target === modal) {
-            closeMsvMatchesModal();
-        }
+        let msvModal = document.getElementById('msvMatchesModal');
+        let chartModal = document.getElementById('visitorChartModal');
+        if (e.target === msvModal) closeMsvMatchesModal();
+        if (e.target === chartModal) closeVisitorChartModal();
     }
 
+    // Init
+    trackAndLoadVisitors();
     fetchAllData();
 
     setInterval(() => {
