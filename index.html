@@ -47,6 +47,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
+        /* DIASHOW BANNER BOX */
         .banner-box {
             background: #0d1117;
             border: 1px solid var(--border-color);
@@ -55,6 +56,8 @@
             margin-bottom: 20px;
             text-align: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            overflow: hidden;
+            position: relative;
         }
 
         .banner-img {
@@ -65,6 +68,7 @@
             border-radius: 6px;
             display: block;
             margin: 0 auto;
+            transition: opacity 0.8s ease-in-out;
         }
 
         .title-row {
@@ -276,7 +280,7 @@
             font-weight: bold;
         }
 
-        /* ERWEITERTE STATISTIK-KACHELN (WIE AUF DEM BILD) */
+        /* ERWEITERTE STATISTIK-KACHELN */
         .stats-grid-top {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
@@ -422,7 +426,7 @@
             background: rgba(0, 51, 153, 0.25);
         }
 
-        /* FUSSZEILE (UNTERE LEISTE) */
+        /* FUSSZEILE */
         .footer-row {
             display: flex;
             justify-content: space-between;
@@ -549,8 +553,9 @@
 <body>
 
 <div class="container">
+    <!-- DIASHOW BANNER (INKL. MANNSCHAFTSFOTO & 4 NEUEN BILDERN) -->
     <div class="banner-box">
-        <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/banner_msv.png" alt="MSV Banner" class="banner-img">
+        <img id="bannerSlideshow" src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/banner_msv.png" alt="MSV Diashow" class="banner-img">
     </div>
 
     <div class="title-row">
@@ -565,7 +570,7 @@
         <div class="live-badge" id="liveIndicatorBadge"><span class="live-dot"></span> LIVE-SPIELE LÄUFT</div>
     </div>
 
-    <!-- SAISON-AUSWERTUNG WIE AUF DEM BEISPIELBILD -->
+    <!-- SAISON-AUSWERTUNG -->
     <div class="section-box">
         <div class="section-header">
             <span>MSV Duisburg — Saison-Auswertung</span>
@@ -722,6 +727,30 @@
     let teamLogos = {};
     let previousScores = {}; 
     let isInitialLoad = true;
+
+    // DIASHOW BILDER ARRAY (INKL. URSPRÜNGLICHES MANNSCHAFTSFOTO & DIE 4 NEUEN)
+    const msvBannerImages = [
+        "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/banner_msv.png",
+        "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/msv04.png",
+        "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/msv_01.png",
+        "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/msv_02.png",
+        "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/msv_03.png"
+    ];
+    let currentBannerIndex = 0;
+
+    function startBannerSlideshow() {
+        const imgElement = document.getElementById('bannerSlideshow');
+        if (!imgElement) return;
+
+        setInterval(() => {
+            imgElement.style.opacity = 0;
+            setTimeout(() => {
+                currentBannerIndex = (currentBannerIndex + 1) % msvBannerImages.length;
+                imgElement.src = msvBannerImages[currentBannerIndex];
+                imgElement.style.opacity = 1;
+            }, 800);
+        }, 5000); // Wechselt alle 5 Sekunden
+    }
 
     function urlBase64ToUint8Array(base64String) {
         const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -1263,17 +1292,15 @@
             });
         });
 
-        // Bester Sieg & Höchste Schlappe ermitteln
         let wins = msvMatchesList.filter(m => m.outcome === 'win');
         let losses = msvMatchesList.filter(m => m.outcome === 'loss');
 
         wins.sort((a, b) => b.diff - a.diff);
-        losses.sort((a, b) => a.diff - b.diff); // Negativster Diff zuerst
+        losses.sort((a, b) => a.diff - b.diff);
 
         let bestWinText = wins.length > 0 ? `${wins[0].scoreStr} (vs. ${wins[0].oppName}, ST ${wins[0].matchday})` : 'Noch kein Sieg';
         let worstLossText = losses.length > 0 ? `${losses[0].scoreStr} (vs. ${losses[0].oppName}, ST ${losses[0].matchday})` : 'Noch keine Niederlage';
 
-        // Top Kacheln (6 Stück wie auf dem Bild)
         document.getElementById('msvTopStatsGrid').innerHTML = `
             <div class="stat-card"><div class="stat-label">Spiele</div><div class="stat-value">${played}</div></div>
             <div class="stat-card"><div class="stat-label">Siege</div><div class="stat-value" style="color: #3fb950;">${won}</div></div>
@@ -1283,7 +1310,6 @@
             <div class="stat-card"><div class="stat-label">Punkte</div><div class="stat-value">${points}</div></div>
         `;
 
-        // Bottom Kacheln (Bester Sieg & Höchste Schlappe)
         document.getElementById('msvBottomStatsGrid').innerHTML = `
             <div class="stat-card-wide">
                 <div class="stat-label">Bester Sieg</div>
@@ -1295,7 +1321,6 @@
             </div>
         `;
 
-        // Formverlauf (letzte Spiele)
         let formContainer = document.getElementById('msvFormBadges');
         if (msvMatchesList.length === 0) {
             formContainer.innerHTML = '<span style="font-size: 0.75rem; color: var(--text-muted);">Noch keine Spiele absolviert.</span>';
@@ -1383,6 +1408,7 @@
     }
 
     // Init
+    startBannerSlideshow();
     trackAndLoadVisitors();
     fetchAllData();
 
