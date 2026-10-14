@@ -377,8 +377,6 @@
         }
         .matchday-btn:hover { background: var(--primary-blue-hover); border-color: var(--msv-bright-blue); }
 
-        .msv-highlight { color: var(--msv-bright-blue) !important; font-weight: bold; }
-
         .table-container {
             width: 100%;
             overflow-x: auto;
@@ -717,7 +715,6 @@
     let detailedGoalsCache = {};
     let teamLogos = {};
     
-    // Gespeicherte Spielstände dauerhaft im Browser-Speicher sichern
     let previousScores = JSON.parse(localStorage.getItem('msv_previous_scores') || '{}');
     let isInitialLoad = true;
 
@@ -939,6 +936,7 @@
                         teamLogos[match.team2.teamName.trim().toLowerCase()] = match.team2.teamIconUrl;
                     }
 
+                    // OpenLigaDB liefert 'matchIsFinished: false' und Sportergebnisse während des Spiels
                     let isCurrentlyLive = !match.matchIsFinished && match.matchResults && match.matchResults.length > 0;
                     if (isCurrentlyLive) hasLiveMatches = true;
 
@@ -963,16 +961,13 @@
                     if (homeScore !== null && awayScore !== null) {
                         let prev = previousScores[matchId];
                         if (prev === undefined) {
-                            // Erster Lade-Durchlauf: Wert direkt merken ohne Alarm
                             previousScores[matchId] = { home: homeScore, away: awayScore };
                         } else {
-                            // Wenn sich Tore erhöht haben -> Push auslösen!
                             if (homeScore > prev.home || awayScore > prev.away) {
                                 let lastGoalObj = (match.goals && match.goals.length > 0) ? match.goals[match.goals.length - 1] : null;
                                 let scorer = lastGoalObj ? lastGoalObj.goalGetterName : '';
                                 let min = lastGoalObj ? lastGoalObj.matchMinute : '';
 
-                                console.log("TOR ERKANNT! Sende Push:", homeTeam, "vs", awayTeam, homeScore, ":", awayScore);
                                 triggerAutomaticGoalPush(homeTeam, awayTeam, homeScore, awayScore, scorer, min);
                             }
                             previousScores[matchId] = { home: homeScore, away: awayScore };
@@ -1007,8 +1002,11 @@
                 });
             }
 
+            // Live-Badge Einblendung korrigiert
             let liveBadge = document.getElementById('liveIndicatorBadge');
-            if (liveBadge) liveBadge.style.display = hasLiveMatches ? 'flex' : 'none';
+            if (liveBadge) {
+                liveBadge.style.display = hasLiveMatches ? 'flex' : 'none';
+            }
 
             if (isInitialLoad) {
                 currentMatchday = nearestMatchday;
@@ -1349,6 +1347,7 @@
     trackAndLoadVisitors();
     fetchAllData();
 
+    // Automatischer Abruf alle 30 Sekunden im Hintergrund
     setInterval(() => {
         fetchAllData(false);
     }, 30000);
