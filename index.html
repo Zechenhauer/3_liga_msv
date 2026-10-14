@@ -507,6 +507,25 @@
             font-size: 1rem;
         }
 
+        .admin-box {
+            display: none;
+            background: #0d1117;
+            border: 1px dashed var(--msv-bright-blue);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+        .admin-box input, .admin-box select {
+            background: #161b22;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
+
         .chart-bar-row {
             display: flex;
             align-items: center;
@@ -567,6 +586,8 @@
             <div class="header-actions">
                 <button class="header-action-btn" onclick="requestPushPermission()">🔔 Push-Alarm</button>
                 <button class="btn-modal-open" onclick="openMsvMatchesModal()">📅 Alle Spiele</button>
+                <button class="btn-modal-open" onclick="openLeagueScorersModal()">⚽ Torjägerliste</button>
+                <button class="btn-modal-open" style="background: #2ea043; color: #fff;" onclick="openMsvScorersModal()">⚽ MSV-Torschützen</button>
             </div>
         </div>
 
@@ -686,6 +707,89 @@
     </div>
 </div>
 
+<!-- POPUP MODAL: TORJÄGERLISTE (GESAMT) + ADMIN -->
+<div class="modal-overlay" id="leagueScorersModal">
+    <div class="modal-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+            <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff; display: flex; align-items: center; gap: 10px;">
+                <span>⚽ Torjäger — 3. Liga</span>
+            </div>
+            <button class="btn-danger" onclick="closeLeagueScorersModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="admin-box" id="adminBoxLeague">
+                <div style="font-size: 0.8rem; font-weight: bold; color: var(--msv-bright-blue); margin-bottom: 8px;">➕ Torschütze hinzufügen (Admin):</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                    <input type="text" id="manualPlayerNameLeague" placeholder="Spielername" style="flex: 2; min-width: 130px;">
+                    <select id="manualTeamSelectLeague" style="flex: 2; min-width: 130px;"></select>
+                    <input type="number" id="manualSpieleLeague" value="9" min="0" max="38" style="width: 55px; text-align: center;" title="Spiele (Sp)">
+                    <input type="number" id="manualToreLeague" value="1" min="1" max="50" style="width: 55px; text-align: center;" title="Tore">
+                    <button class="btn-modal-open" onclick="saveScorerToSupabase('league')">Speichern</button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 35px; text-align: center;">#</th>
+                            <th>Spieler</th>
+                            <th style="text-align: center; width: 50px;">Sp</th>
+                            <th style="text-align: center; width: 60px;">Tore</th>
+                            <th style="width: 40px; text-align: center;" id="actionHeaderCol" style="display: none;">Aktion</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leagueScorersModalBody">
+                        <tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Lade Torjäger...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <button class="btn" style="margin-top: 15px;" onclick="closeLeagueScorersModal()">Schließen</button>
+    </div>
+</div>
+
+<!-- POPUP MODAL: MSV TORSCHÜTZEN + ADMIN -->
+<div class="modal-overlay" id="msvScorersModal">
+    <div class="modal-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+            <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff; display: flex; align-items: center; gap: 10px;">
+                <span>⚽ MSV Torjäger — MSV Duisburg</span>
+            </div>
+            <button class="btn-danger" onclick="closeMsvScorersModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="admin-box" id="adminBoxMsv">
+                <div style="font-size: 0.8rem; font-weight: bold; color: var(--msv-bright-blue); margin-bottom: 8px;">➕ MSV Torschütze hinzufügen (Admin):</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                    <input type="text" id="manualPlayerNameMsv" placeholder="Spielername" style="flex: 2; min-width: 140px;">
+                    <input type="number" id="manualSpieleMsv" value="9" min="0" max="38" style="width: 55px; text-align: center;" title="Spiele (Sp)">
+                    <input type="number" id="manualToreMsv" value="1" min="1" max="50" style="width: 55px; text-align: center;" title="Tore">
+                    <button class="btn-modal-open" onclick="saveScorerToSupabase('msv')">Speichern</button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 35px; text-align: center;">#</th>
+                            <th>Spieler</th>
+                            <th style="text-align: center; width: 50px;">Sp</th>
+                            <th style="text-align: center; width: 60px;">Tore</th>
+                            <th style="width: 40px; text-align: center;" id="actionHeaderColMsv" style="display: none;">Aktion</th>
+                        </tr>
+                    </thead>
+                    <tbody id="msvScorersModalBody">
+                        <tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Lade MSV Torjäger...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <button class="btn" style="margin-top: 15px;" onclick="closeMsvScorersModal()">Schließen</button>
+    </div>
+</div>
+
 <!-- AUFRUF-DIAGRAMM MODAL -->
 <div class="modal-overlay" id="visitorChartModal">
     <div class="modal-card" style="max-width: 500px;">
@@ -714,6 +818,7 @@
     let openLigaMatches = {};
     let detailedGoalsCache = {};
     let teamLogos = {};
+    let allTeamNames = [];
     
     let previousScores = JSON.parse(localStorage.getItem('msv_previous_scores') || '{}');
     let isInitialLoad = true;
@@ -844,16 +949,15 @@
     }
 
     function toggleAdminMode() {
-        const adminCard = document.getElementById('adminCard');
-        if (isAdmin) {
-            isAdmin = false;
-            adminCard.style.display = 'none';
-            return;
-        }
         let enteredPin = prompt("Bitte Admin-PIN eingeben:");
         if (enteredPin === ADMIN_PIN) {
-            isAdmin = true;
-            adminCard.style.display = 'block';
+            isAdmin = !isAdmin;
+            document.getElementById('adminCard').style.display = isAdmin ? 'block' : 'none';
+            document.getElementById('adminBoxLeague').style.display = isAdmin ? 'block' : 'none';
+            document.getElementById('adminBoxMsv').style.display = isAdmin ? 'block' : 'none';
+            alert(isAdmin ? "Admin-Modus aktiviert!" : "Admin-Modus gesperrt.");
+            loadScorersFromSupabase(false);
+            loadScorersFromSupabase(true);
         } else if (enteredPin !== null) {
             alert("Falsche PIN!");
         }
@@ -922,6 +1026,7 @@
             let dataMatches = await resMatches.json();
 
             openLigaMatches = {};
+            let teamsSet = new Set();
             let today = new Date();
             let nearestMatchday = 1;
             let minDateDiff = Infinity;
@@ -929,14 +1034,15 @@
 
             if (Array.isArray(dataMatches)) {
                 dataMatches.forEach(match => {
-                    if (match.team1?.teamName && match.team1?.teamIconUrl) {
-                        teamLogos[match.team1.teamName.trim().toLowerCase()] = match.team1.teamIconUrl;
+                    if (match.team1?.teamName) {
+                        teamsSet.add(match.team1.teamName);
+                        if (match.team1.teamIconUrl) teamLogos[match.team1.teamName.trim().toLowerCase()] = match.team1.teamIconUrl;
                     }
-                    if (match.team2?.teamName && match.team2?.teamIconUrl) {
-                        teamLogos[match.team2.teamName.trim().toLowerCase()] = match.team2.teamIconUrl;
+                    if (match.team2?.teamName) {
+                        teamsSet.add(match.team2.teamName);
+                        if (match.team2.teamIconUrl) teamLogos[match.team2.teamName.trim().toLowerCase()] = match.team2.teamIconUrl;
                     }
 
-                    // OpenLigaDB liefert 'matchIsFinished: false' und Sportergebnisse während des Spiels
                     let isCurrentlyLive = !match.matchIsFinished && match.matchResults && match.matchResults.length > 0;
                     if (isCurrentlyLive) hasLiveMatches = true;
 
@@ -1002,7 +1108,9 @@
                 });
             }
 
-            // Live-Badge Einblendung korrigiert
+            allTeamNames = Array.from(teamsSet).sort();
+            populateTeamSelect();
+
             let liveBadge = document.getElementById('liveIndicatorBadge');
             if (liveBadge) {
                 liveBadge.style.display = hasLiveMatches ? 'flex' : 'none';
@@ -1020,6 +1128,19 @@
         }
 
         renderAll();
+    }
+
+    function populateTeamSelect() {
+        let select = document.getElementById('manualTeamSelectLeague');
+        if (!select) return;
+        select.innerHTML = '';
+        allTeamNames.forEach(t => {
+            let opt = document.createElement('option');
+            opt.value = t;
+            opt.textContent = t;
+            if (t.includes("MSV Duisburg")) opt.selected = true;
+            select.appendChild(opt);
+        });
     }
 
     async function fetchMatchDetails(matchID) {
@@ -1125,17 +1246,7 @@
         tbody.innerHTML = '';
 
         let stats = {};
-        let allTeams = [];
-        Object.values(openLigaMatches).forEach(matchList => {
-            if (Array.isArray(matchList)) {
-                matchList.forEach(m => {
-                    if (!allTeams.includes(m.home)) allTeams.push(m.home);
-                    if (!allTeams.includes(m.away)) allTeams.push(m.away);
-                });
-            }
-        });
-
-        allTeams.forEach(t => {
+        allTeamNames.forEach(t => {
             stats[t] = { name: t, played: 0, won: 0, draw: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, points: 0 };
         });
 
@@ -1144,7 +1255,8 @@
             matchList.forEach(m => {
                 if (m.homeScore === undefined || m.homeScore === null || m.awayScore === undefined || m.awayScore === null) return;
                 let h = m.home, a = m.away;
-                if (!stats[h] || !stats[a]) return;
+                if (!stats[h]) stats[h] = { name: h, played: 0, won: 0, draw: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, points: 0 };
+                if (!stats[a]) stats[a] = { name: a, played: 0, won: 0, draw: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, points: 0 };
 
                 stats[h].played++;
                 stats[a].played++;
@@ -1338,16 +1450,130 @@
 
     function closeMsvMatchesModal() { document.getElementById('msvMatchesModal').style.display = 'none'; }
 
+    async function openLeagueScorersModal() {
+        document.getElementById('leagueScorersModal').style.display = 'flex';
+        await loadScorersFromSupabase(false);
+    }
+    function closeLeagueScorersModal() { document.getElementById('leagueScorersModal').style.display = 'none'; }
+
+    async function openMsvScorersModal() {
+        document.getElementById('msvScorersModal').style.display = 'flex';
+        await loadScorersFromSupabase(true);
+    }
+    function closeMsvScorersModal() { document.getElementById('msvScorersModal').style.display = 'none'; }
+
+    async function loadScorersFromSupabase(onlyMsv = false) {
+        let tbodyId = onlyMsv ? 'msvScorersModalBody' : 'leagueScorersModalBody';
+        let tbody = document.getElementById(tbodyId);
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Lade Torjägerliste...</td></tr>`;
+
+        let query = supabaseClient.from('msv_manuelle_torschuetzen').select('*').order('tore', { ascending: false });
+        if (onlyMsv) {
+            query = query.ilike('team', '%MSV Duisburg%');
+        }
+
+        let { data, error } = await query;
+
+        if (error) {
+            console.error("Fehler beim Laden:", error);
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--accent-red); padding: 20px;">Fehler beim Laden.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = '';
+        if (!data || data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Noch keine Torjäger eingetragen.</td></tr>`;
+            return;
+        }
+
+        data.forEach((s, idx) => {
+            let tr = document.createElement('tr');
+            let deleteBtnHtml = isAdmin ? `<button class="btn-danger" style="font-size: 0.9rem;" onclick="deleteScorerFromSupabase(${s.id}, ${onlyMsv})" title="Löschen">🗑️</button>` : '';
+
+            let rawRank = idx + 1;
+            let rankDisplay = onlyMsv ? rawRank : (rawRank <= 10 ? rawRank : '');
+
+            tr.innerHTML = `
+                <td style="text-align: center; font-weight: bold; color: var(--msv-bright-blue);">${rankDisplay}</td>
+                <td>
+                    <div style="font-weight: bold; color: #ffffff;">${s.name}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">${s.team}</div>
+                </td>
+                <td style="text-align: center; color: var(--text-color);">${s.spiele}</td>
+                <td style="text-align: center; font-weight: bold; color: #3fb950; font-size: 1.1rem;">${s.tore}</td>
+                <td style="text-align: center;">${isAdmin ? deleteBtnHtml : ''}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    async function saveScorerToSupabase(mode) {
+        let name, team, spiele, tore;
+
+        if (mode === 'league') {
+            name = document.getElementById('manualPlayerNameLeague').value.trim();
+            team = document.getElementById('manualTeamSelectLeague').value;
+            spiele = parseInt(document.getElementById('manualSpieleLeague').value) || 0;
+            tore = parseInt(document.getElementById('manualToreLeague').value) || 1;
+        } else {
+            name = document.getElementById('manualPlayerNameMsv').value.trim();
+            team = "MSV Duisburg";
+            spiele = parseInt(document.getElementById('manualSpieleMsv').value) || 0;
+            tore = parseInt(document.getElementById('manualToreMsv').value) || 1;
+        }
+
+        if (!name) {
+            alert("Bitte gib einen Spielernamen ein!");
+            return;
+        }
+
+        let { error } = await supabaseClient
+            .from('msv_manuelle_torschuetzen')
+            .insert([{ name: name, team: team, spiele: spiele, tore: tore }]);
+
+        if (error) {
+            console.error("Fehler beim Speichern:", error);
+            alert("Fehler beim Speichern in Supabase.");
+            return;
+        }
+
+        if (mode === 'league') {
+            document.getElementById('manualPlayerNameLeague').value = '';
+            await loadScorersFromSupabase(false);
+        } else {
+            document.getElementById('manualPlayerNameMsv').value = '';
+            await loadScorersFromSupabase(true);
+        }
+    }
+
+    async function deleteScorerFromSupabase(id, onlyMsv) {
+        if (!confirm("Möchtest du diesen Torschützen wirklich löschen?")) return;
+
+        let { error } = await supabaseClient
+            .from('msv_manuelle_torschuetzen')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error("Fehler beim Löschen:", error);
+            alert("Fehler beim Löschen.");
+            return;
+        }
+
+        await loadScorersFromSupabase(onlyMsv);
+    }
+
     window.onclick = function(e) {
         if (e.target === document.getElementById('msvMatchesModal')) closeMsvMatchesModal();
         if (e.target === document.getElementById('visitorChartModal')) closeVisitorChartModal();
+        if (e.target === document.getElementById('leagueScorersModal')) closeLeagueScorersModal();
+        if (e.target === document.getElementById('msvScorersModal')) closeMsvScorersModal();
     }
 
     startBannerSlideshow();
     trackAndLoadVisitors();
     fetchAllData();
 
-    // Automatischer Abruf alle 30 Sekunden im Hintergrund
     setInterval(() => {
         fetchAllData(false);
     }, 30000);
