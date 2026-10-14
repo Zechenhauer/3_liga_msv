@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MSV 3. Liga</title>
 
-    <!-- Perfektes SVG App-Icon für iPhone & Android direkt im Code -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23070f26%22/><text x=%2250%22 y=%2265%22 font-size=%2255%22 text-anchor=%22middle%22>⚽</text></svg>">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23070f26%22/><text x=%2250%22 y=%2265%22 font-size=%2255%22 text-anchor=%22middle%22>⚽</text></svg>">
 
-    <!-- Supabase Client Bibliothek laden -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -18,7 +16,7 @@
             --text-color: #c9d1d9;
             --text-muted: #8b949e;
             --border-color: #30363d;
-            --primary-blue: #003399; /* MSV Blau */
+            --primary-blue: #003399;
             --primary-blue-hover: #0044cc;
             --accent-green: #2ea043;
             --accent-red: #f85149;
@@ -47,7 +45,6 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
-        /* DIASHOW BANNER BOX */
         .banner-box {
             background: #0d1117;
             border: 1px solid var(--border-color);
@@ -85,7 +82,6 @@
             object-fit: contain;
         }
 
-        /* Mini-Logo für Tabellenzeilen */
         .team-cell-content {
             display: flex;
             align-items: center;
@@ -280,7 +276,6 @@
             font-weight: bold;
         }
 
-        /* ERWEITERTE STATISTIK-KACHELN */
         .stats-grid-top {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
@@ -426,7 +421,6 @@
             background: rgba(0, 51, 153, 0.25);
         }
 
-        /* FUSSZEILE */
         .footer-row {
             display: flex;
             justify-content: space-between;
@@ -515,7 +509,6 @@
             font-size: 1rem;
         }
 
-        /* DIAGRAMM STYLES */
         .chart-bar-row {
             display: flex;
             align-items: center;
@@ -553,7 +546,6 @@
 <body>
 
 <div class="container">
-    <!-- DIASHOW BANNER -->
     <div class="banner-box">
         <img id="bannerSlideshow" src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/banner_msv.png" alt="MSV Diashow" class="banner-img">
     </div>
@@ -566,7 +558,7 @@
     <div class="subtitle">3. Liga — Spielplan, Live-Tabelle & Ergebnisse via OpenLigaDB</div>
     <div class="meta-info">
         <span>⚡ Web-App & Management: Jürgen Schützendorf</span>
-        <span class="api-badge">● Live-Auto-Refresh (60s)</span>
+        <span class="api-badge">● Live-Auto-Refresh (30s)</span>
         <div class="live-badge" id="liveIndicatorBadge"><span class="live-dot"></span> LIVE-SPIELE LÄUFT</div>
     </div>
 
@@ -660,7 +652,6 @@
         <button class="btn" style="background: #e3b341; color: #0d1117;" onclick="simulateLiveGoal()">⚡ Live-Tor simulieren (Test)</button>
     </div>
 
-    <!-- FUSSZEILE -->
     <div class="footer-row">
         <div class="footer-left">
             <div class="visitor-counter-badge" id="visitorCounterDisplay">👀 Aufrufe: ...</div>
@@ -725,10 +716,11 @@
     let openLigaMatches = {};
     let detailedGoalsCache = {};
     let teamLogos = {};
-    let previousScores = {}; 
+    
+    // Gespeicherte Spielstände dauerhaft im Browser-Speicher sichern
+    let previousScores = JSON.parse(localStorage.getItem('msv_previous_scores') || '{}');
     let isInitialLoad = true;
 
-    // DIASHOW BILDER ARRAY
     const msvBannerImages = [
         "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/banner_msv.png",
         "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/msv04.png",
@@ -796,14 +788,11 @@
             }, { onConflict: 'endpoint' });
 
             if (error) {
-                console.error("Supabase Fehlerdetails:", error);
                 alert("Fehler in Supabase: " + error.message);
             } else {
-                alert("Push-Alarm für MSV Duisburg erfolgreich aktiviert! Dein Gerät ist jetzt registriert.");
+                alert("Push-Alarm für MSV Duisburg erfolgreich aktiviert!");
             }
-
         } catch (error) {
-            console.error('Fehler bei der Push-Registrierung:', error);
             alert("Fehler beim Aktivieren der Benachrichtigung: " + error.message);
         }
     }
@@ -818,15 +807,13 @@
                 body: JSON.stringify({
                     table: 'push_subscriptions_msv',
                     title: "⚽ MSV Duisburg Test-Alarm",
-                    body: "Das Test-Tor für den MSV wurde erfolgreich über die Edge Function ausgelöst!"
+                    body: "Das Test-Tor für den MSV wurde erfolgreich ausgelöst!"
                 })
             });
-
-            const textResponse = await response.text();
             if (response.ok) {
-                alert("Test-Push für MSV Duisburg erfolgreich ausgelöst!");
+                alert("Test-Push erfolgreich ausgelöst!");
             } else {
-                alert("Fehler von der Edge Function: " + textResponse);
+                alert("Fehler beim Senden.");
             }
         } catch (e) {
             alert("Netzwerkfehler: " + e.message);
@@ -836,9 +823,7 @@
     async function triggerAutomaticGoalPush(home, away, hScore, aScore, scorerName = '', minute = '') {
         try {
             let detail = scorerName ? 'Tor durch ' + scorerName : "Tor!";
-            if (minute) {
-                detail += ' (' + minute + '. Min)';
-            }
+            if (minute) detail += ' (' + minute + '. Min)';
 
             const targetUrl = SUPABASE_URL + '/functions/v1/send-push';
             await fetch(targetUrl, {
@@ -847,7 +832,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     table: 'push_subscriptions_msv',
-                    title: `⚽ TOR FÜR MSV! (${hScore}:${aScore})`,
+                    title: `⚽ TOR! (${hScore}:${aScore})`,
                     body: `${home} vs ${away} — ${detail}`
                 })
             });
@@ -857,8 +842,8 @@
     }
 
     async function simulateLiveGoal() {
-        await triggerAutomaticGoalPush("MSV Duisburg", "Rot-Weiss Essen", 1, 0, "Alex Meier", "19");
-        alert("Simuliertes Live-Tor gesendet! Die Push-Nachricht sollte gleich auf dem Handy erscheinen.");
+        await triggerAutomaticGoalPush("MSV Duisburg", "Rot-Weiss Essen", 1, 0, "Test-Spieler", "19");
+        alert("Simuliertes Live-Tor gesendet!");
     }
 
     function toggleAdminMode() {
@@ -877,14 +862,12 @@
         }
     }
 
-    // BESUCHER-ZÄHLER & DIAGRAMM LOGIK (ROBUST MIT FALLBACK)
     async function trackAndLoadVisitors() {
         const todayStr = new Date().toISOString().split('T')[0];
         let visitorData = [{ date: todayStr, count: 1 }];
 
         try {
-            // Versuche in Supabase zu zählen
-            let { data: existing, error: fetchErr } = await supabaseClient
+            let { data: existing } = await supabaseClient
                 .from('app_visitors_msv')
                 .select('*')
                 .eq('date', todayStr)
@@ -907,20 +890,16 @@
                 .order('date', { ascending: false })
                 .limit(7);
 
-            if (allRows && allRows.length > 0) {
-                visitorData = allRows;
-            }
+            if (allRows && allRows.length > 0) visitorData = allRows;
         } catch (e) {
-            console.warn("Supabase Aufrufe-Tabelle nicht erreichbar, nutze lokalen Fallback:", e);
+            console.warn("Besucherzähler Fallback aktiv");
         }
 
-        // Render Counter & Diagramm
         let totalViews = visitorData.reduce((sum, r) => sum + r.count, 0);
         document.getElementById('visitorCounterDisplay').textContent = '👀 Aufrufe: ' + totalViews;
 
         let chartHtml = '';
         let maxCount = Math.max(...visitorData.map(r => r.count), 1);
-        
         visitorData.forEach(row => {
             let formattedDate = row.date ? row.date.split('-').reverse().slice(0, 2).join('.') : todayStr;
             let percentage = Math.round((row.count / maxCount) * 100);
@@ -937,13 +916,8 @@
         document.getElementById('visitorChartBody').innerHTML = chartHtml;
     }
 
-    function openVisitorChartModal() {
-        document.getElementById('visitorChartModal').style.display = 'flex';
-    }
-
-    function closeVisitorChartModal() {
-        document.getElementById('visitorChartModal').style.display = 'none';
-    }
+    function openVisitorChartModal() { document.getElementById('visitorChartModal').style.display = 'flex'; }
+    function closeVisitorChartModal() { document.getElementById('visitorChartModal').style.display = 'none'; }
 
     async function fetchAllData(showAlert = false) {
         try {
@@ -958,17 +932,17 @@
 
             if (Array.isArray(dataMatches)) {
                 dataMatches.forEach(match => {
-                    if (match.team1 && match.team1.teamName && match.team1.teamIconUrl) {
+                    if (match.team1?.teamName && match.team1?.teamIconUrl) {
                         teamLogos[match.team1.teamName.trim().toLowerCase()] = match.team1.teamIconUrl;
                     }
-                    if (match.team2 && match.team2.teamName && match.team2.teamIconUrl) {
+                    if (match.team2?.teamName && match.team2?.teamIconUrl) {
                         teamLogos[match.team2.teamName.trim().toLowerCase()] = match.team2.teamIconUrl;
                     }
 
                     let isCurrentlyLive = !match.matchIsFinished && match.matchResults && match.matchResults.length > 0;
                     if (isCurrentlyLive) hasLiveMatches = true;
 
-                    let mDay = match.group && match.group.groupOrderID ? match.group.groupOrderID : 1;
+                    let mDay = match.group?.groupOrderID || 1;
                     if (!openLigaMatches[mDay]) openLigaMatches[mDay] = [];
 
                     let homeTeam = match.team1.teamName;
@@ -978,14 +952,8 @@
                     let homeScore = null;
                     let awayScore = null;
 
-                    if (match.matchIsFinished && match.matchResults && match.matchResults.length > 0) {
+                    if (match.matchResults && match.matchResults.length > 0) {
                         let res = match.matchResults.find(r => r.resultTypeID === 2) || match.matchResults[match.matchResults.length - 1];
-                        if (res) {
-                            homeScore = res.pointsTeam1;
-                            awayScore = res.pointsTeam2;
-                        }
-                    } else if (match.matchResults && match.matchResults.length > 0) {
-                        let res = match.matchResults[match.matchResults.length - 1];
                         if (res && res.pointsTeam1 !== null && res.pointsTeam2 !== null) {
                             homeScore = res.pointsTeam1;
                             awayScore = res.pointsTeam2;
@@ -994,17 +962,24 @@
 
                     if (homeScore !== null && awayScore !== null) {
                         let prev = previousScores[matchId];
-                        if (prev !== undefined) {
+                        if (prev === undefined) {
+                            // Erster Lade-Durchlauf: Wert direkt merken ohne Alarm
+                            previousScores[matchId] = { home: homeScore, away: awayScore };
+                        } else {
+                            // Wenn sich Tore erhöht haben -> Push auslösen!
                             if (homeScore > prev.home || awayScore > prev.away) {
                                 let lastGoalObj = (match.goals && match.goals.length > 0) ? match.goals[match.goals.length - 1] : null;
                                 let scorer = lastGoalObj ? lastGoalObj.goalGetterName : '';
                                 let min = lastGoalObj ? lastGoalObj.matchMinute : '';
 
+                                console.log("TOR ERKANNT! Sende Push:", homeTeam, "vs", awayTeam, homeScore, ":", awayScore);
                                 triggerAutomaticGoalPush(homeTeam, awayTeam, homeScore, awayScore, scorer, min);
                             }
+                            previousScores[matchId] = { home: homeScore, away: awayScore };
                         }
-                        previousScores[matchId] = { home: homeScore, away: awayScore };
                     }
+
+                    localStorage.setItem('msv_previous_scores', JSON.stringify(previousScores));
 
                     let matchDateObj = new Date(match.matchDateTime);
                     let dateStr = match.matchDateTime ? match.matchDateTime.split('T')[0] : "";
@@ -1033,18 +1008,16 @@
             }
 
             let liveBadge = document.getElementById('liveIndicatorBadge');
-            if (liveBadge) {
-                liveBadge.style.display = hasLiveMatches ? 'flex' : 'none';
-            }
+            if (liveBadge) liveBadge.style.display = hasLiveMatches ? 'flex' : 'none';
 
             if (isInitialLoad) {
                 currentMatchday = nearestMatchday;
                 isInitialLoad = false;
             }
 
-            if (showAlert) alert("Daten erfolgreich von OpenLigaDB aktualisiert!");
+            if (showAlert) alert("Daten erfolgreich aktualisiert!");
         } catch (e) {
-            console.error("Fehler beim Abrufen von OpenLigaDB:", e);
+            console.error("Fehler beim Abrufen:", e);
             if (showAlert) alert("Fehler beim Abrufen der Live-Daten.");
         }
 
@@ -1062,9 +1035,9 @@
             if (Array.isArray(rawGoals)) {
                 rawGoals.forEach(g => {
                     let name = g.goalGetterName;
-                    let min = (g.matchMinute !== undefined && g.matchMinute !== null) ? g.matchMinute : (g.minute !== undefined ? g.minute : '');
-                    let scoreH = g.scoreTeam1 !== undefined && g.scoreTeam1 !== null ? g.scoreTeam1 : (g.scoreGoal1 !== undefined ? g.scoreGoal1 : 0);
-                    let scoreA = g.scoreTeam2 !== undefined && g.scoreTeam2 !== null ? g.scoreTeam2 : (g.scoreGoal2 !== undefined ? g.scoreGoal2 : 0);
+                    let min = (g.matchMinute !== undefined && g.matchMinute !== null) ? g.matchMinute : '';
+                    let scoreH = g.scoreTeam1 ?? 0;
+                    let scoreA = g.scoreTeam2 ?? 0;
                     
                     let minStr = min !== '' ? `${min}. Min` : '';
                     let goalText = name ? `⚽ ${name}${minStr ? ' (' + minStr + ')' : ''} — <strong>(${scoreH}:${scoreA})</strong>` : `⚽ Tor${minStr ? ' (' + minStr + ')' : ''} — <strong>(${scoreH}:${scoreA})</strong>`;
@@ -1084,19 +1057,9 @@
         let nameStyle = isHighlighted ? 'color: var(--msv-bright-blue); font-weight: bold;' : '';
 
         if (alignRight) {
-            return `
-                <div class="team-cell-content right">
-                    <span style="${nameStyle}">${teamName}</span>
-                    ${logoHtml}
-                </div>
-            `;
+            return `<div class="team-cell-content right"><span style="${nameStyle}">${teamName}</span>${logoHtml}</div>`;
         } else {
-            return `
-                <div class="team-cell-content">
-                    ${logoHtml}
-                    <span style="${nameStyle}">${teamName}</span>
-                </div>
-            `;
+            return `<div class="team-cell-content">${logoHtml}<span style="${nameStyle}">${teamName}</span></div>`;
         }
     }
 
@@ -1119,7 +1082,6 @@
         tbody.innerHTML = '';
         
         let existingMatches = openLigaMatches[currentMatchday] || [];
-
         if (existingMatches.length === 0) {
             tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 20px;">Keine Spiele für Spieltag ${currentMatchday} gefunden.</td></tr>`;
             return;
@@ -1133,9 +1095,7 @@
             let isHomeMSV = m.home.includes("MSV Duisburg");
             let isAwayMSV = m.away.includes("MSV Duisburg");
 
-            let resultDisplay = hasResult 
-                ? `<strong>${m.homeScore}:${m.awayScore}</strong>` 
-                : `<span style="color: var(--text-muted); font-style: italic;">vs</span>`;
+            let resultDisplay = hasResult ? `<strong>${m.homeScore}:${m.awayScore}</strong>` : `<span style="color: var(--text-muted); font-style: italic;">vs</span>`;
 
             if (hasResult && m.isFinished) {
                 resultDisplay += '<div style="font-size: 0.65rem; color: #3fb950; margin-top: 2px;">(Endstand)</div>';
@@ -1237,12 +1197,7 @@
 
             tr.innerHTML = `
                 <td><strong>${idx + 1}.</strong></td>
-                <td>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        ${logoHtml}
-                        <span>${s.name}</span>
-                    </div>
-                </td>
+                <td><div style="display: flex; align-items: center; gap: 8px;">${logoHtml}<span>${s.name}</span></div></td>
                 <td style="text-align: center;">${s.played}</td>
                 <td style="text-align: center;">${s.won}</td>
                 <td style="text-align: center;">${s.draw}</td>
@@ -1296,7 +1251,7 @@
         let losses = msvMatchesList.filter(m => m.outcome === 'loss');
 
         wins.sort((a, b) => b.diff - a.diff);
-        losses.sort((a, b) => b.diff - b.diff);
+        losses.sort((a, b) => b.diff - a.diff);
 
         let bestWinText = wins.length > 0 ? `${wins[0].scoreStr} (vs. ${wins[0].oppName}, ST ${wins[0].matchday})` : 'Noch kein Sieg';
         let worstLossText = losses.length > 0 ? `${losses[0].scoreStr} (vs. ${losses[0].oppName}, ST ${losses[0].matchday})` : 'Noch keine Niederlage';
@@ -1311,14 +1266,8 @@
         `;
 
         document.getElementById('msvBottomStatsGrid').innerHTML = `
-            <div class="stat-card-wide">
-                <div class="stat-label">Bester Sieg</div>
-                <div class="stat-wide-value" style="color: #3fb950;">${bestWinText}</div>
-            </div>
-            <div class="stat-card-wide">
-                <div class="stat-label">Höchste Schlappe</div>
-                <div class="stat-wide-value" style="color: #f85149;">${worstLossText}</div>
-            </div>
+            <div class="stat-card-wide"><div class="stat-label">Bester Sieg</div><div class="stat-wide-value" style="color: #3fb950;">${bestWinText}</div></div>
+            <div class="stat-card-wide"><div class="stat-label">Höchste Schlappe</div><div class="stat-wide-value" style="color: #f85149;">${worstLossText}</div></div>
         `;
 
         let formContainer = document.getElementById('msvFormBadges');
@@ -1369,14 +1318,8 @@
                     else badgeClass = 'msv-badge-loss';
                 }
 
-                let homeDisplay = m.home;
-                let awayDisplay = m.away;
-
-                if (isHome) {
-                    homeDisplay = `<span class="${badgeClass}">${m.home}</span>`;
-                } else {
-                    awayDisplay = `<span class="${badgeClass}">${m.away}</span>`;
-                }
+                let homeDisplay = isHome ? `<span class="${badgeClass}">${m.home}</span>` : m.home;
+                let awayDisplay = !isHome ? `<span class="${badgeClass}">${m.away}</span>` : m.away;
 
                 let resultDisplay = hasResult ? `<strong>${m.homeScore}:${m.awayScore}</strong>` : `<span style="color:var(--text-muted);">-:-</span>`;
                 let formattedDate = m.date ? m.date.split('-').reverse().join('.') : 'Offen';
@@ -1392,29 +1335,23 @@
                 modalBody.appendChild(tr);
             });
         }
-
         document.getElementById('msvMatchesModal').style.display = 'flex';
     }
 
-    function closeMsvMatchesModal() {
-        document.getElementById('msvMatchesModal').style.display = 'none';
-    }
+    function closeMsvMatchesModal() { document.getElementById('msvMatchesModal').style.display = 'none'; }
 
     window.onclick = function(e) {
-        let msvModal = document.getElementById('msvMatchesModal');
-        let chartModal = document.getElementById('visitorChartModal');
-        if (e.target === msvModal) closeMsvMatchesModal();
-        if (e.target === chartModal) closeVisitorChartModal();
+        if (e.target === document.getElementById('msvMatchesModal')) closeMsvMatchesModal();
+        if (e.target === document.getElementById('visitorChartModal')) closeVisitorChartModal();
     }
 
-    // Init
     startBannerSlideshow();
     trackAndLoadVisitors();
     fetchAllData();
 
     setInterval(() => {
         fetchAllData(false);
-    }, 60000);
+    }, 30000);
 </script>
 
 </body>
