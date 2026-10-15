@@ -1544,6 +1544,10 @@
         data.forEach((s, idx) => {
             let tr = document.createElement('tr');
             
+            // Vereinslogo für den Torschützen ermitteln
+            let logoUrl = teamLogos[s.team.trim().toLowerCase()] || '';
+            let teamLogoHtml = logoUrl ? `<img src="${logoUrl}" alt="${s.team}" class="team-mini-logo" style="width: 14px; height: 14px; vertical-align: middle; margin-left: 4px;">` : '';
+
             let actionsHtml = '';
             if (isAdmin) {
                 actionsHtml = `
@@ -1560,7 +1564,9 @@
                 <td style="text-align: center; font-weight: bold; color: var(--msv-bright-blue);">${rankDisplay}</td>
                 <td>
                     <div style="font-weight: bold; color: #ffffff;">${s.name}</div>
-                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">${s.team}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; display: flex; align-items: center; gap: 4px;">
+                        <span>${s.team}</span>${teamLogoHtml}
+                    </div>
                 </td>
                 <td style="text-align: center; color: var(--text-color);">${s.spiele}</td>
                 <td style="text-align: center; font-weight: bold; color: #3fb950; font-size: 1.1rem;">${s.tore}</td>
