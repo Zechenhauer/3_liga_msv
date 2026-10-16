@@ -72,8 +72,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 20px;
+            gap: 15px;
             margin-bottom: 5px;
+            flex-wrap: wrap;
         }
 
         .club-logo {
@@ -579,6 +580,16 @@
             color: #ffffff;
             text-align: left;
         }
+    
+        /* Größeres, rechteckiges Trainer-Foto */
+        .trainer-logo {
+            width: 70px;
+            height: 85px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 2px solid var(--msv-bright-blue);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
     </style>
 </head>
 <body>
@@ -589,9 +600,11 @@
     </div>
 
     <div class="title-row">
+        <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos%202te%20liga/Dietmar%20Hirsch.png" alt="Dietmar Hirsch" class="trainer-logo" title="Trainer Dietmar Hirsch">
         <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/msv%20logo.png" alt="MSV Logo" class="club-logo">
         <h2>MSV Duisburg <span>3. Liga</span></h2>
         <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/msv%20logo.png" alt="MSV Logo" class="club-logo">
+        <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos%202te%20liga/Dietmar%20Hirsch.png" alt="Dietmar Hirsch" class="trainer-logo" title="Trainer Dietmar Hirsch">
     </div>
     <div class="subtitle">3. Liga — Spielplan, Live-Tabelle & Ergebnisse via OpenLigaDB</div>
     <div class="meta-info">
