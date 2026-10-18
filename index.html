@@ -394,7 +394,6 @@
         }
         .matchday-btn:hover { background: var(--msv-blue); border-color: var(--msv-bright-blue); color: #fff; }
 
-        /* SPIELTAGS-KACHELN GRID */
         .match-grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
@@ -718,7 +717,7 @@
             <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/msv%20logo.png" alt="MSV Logo" class="club-logo">
             <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos%202te%20liga/Dietmar%20Hirsch.png" alt="Dietmar Hirsch" class="trainer-logo" title="Trainer Dietmar Hirsch">
         </div>
-        <div class="subtitle">Saison 2026/27 (Mit OpenLigaDB Live-Sync)</div>
+        <div class="subtitle">Saison 2026/27 (Mit OpenLigaDB Live-Sync & Liga-Toren)</div>
         <div class="meta-info">
             <span>⚡ Web-App & Management: Jürgen Schützendorf</span>
             <span class="supabase-badge">● OpenLigaDB Live-Ticker Aktiv</span>
@@ -773,7 +772,7 @@
         </div>
         <div style="font-size: 0.8rem; color: var(--text-color); margin-bottom: 12px; background: rgba(56, 139, 253, 0.08); padding: 10px 12px; border-radius: 6px; border-left: 3px solid var(--msv-bright-blue); display: flex; align-items: center; gap: 8px;">
             <span>💡</span>
-            <span><strong>Tipp:</strong> Klicke in der Tabelle auf einen beliebigen Vereinsnamen, um alle Saisonspiele des jeweiligen Teams anzuzeigen![cite: 2]</span>
+            <span><strong>Tipp:</strong> Klicke in der Tabelle auf einen beliebigen Vereinsnamen, um alle Saisonspiele des jeweiligen Teams anzuzeigen!</span>
         </div>
         <div class="table-container">
             <table>
@@ -1022,7 +1021,7 @@
             }, { onConflict: 'endpoint' });
 
             if (error) alert("Fehler in Supabase: " + error.message);
-            else alert("Push-Alarm für MSV Duisburg erfolgreich aktiviert!");
+            else alert("Push-Alarm für 3. Liga-Tore erfolgreich aktiviert!");
         } catch (error) {
             alert("Fehler beim Aktivieren der Benachrichtigung: " + error.message);
         }
@@ -1037,8 +1036,8 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     table: 'push_subscriptions_msv',
-                    title: "⚽ MSV Test-Alarm",
-                    body: "Das Test-Tor für den MSV wurde erfolgreich ausgelöst!"
+                    title: "⚽ 3. Liga Test-Alarm",
+                    body: "Das Test-Tor für die Liga wurde erfolgreich ausgelöst!"
                 })
             });
             if (response.ok) alert("Test-Push erfolgreich ausgelöst!");
@@ -1190,6 +1189,7 @@
                         }
                     }
 
+                    // --- LIGAWEITE TOR-ERKENNUNG FÜR ALLE SPIELE ---
                     if (homeScore !== null && awayScore !== null) {
                         let prev = previousScores[matchId];
                         if (prev === undefined) {
@@ -1203,9 +1203,8 @@
                             }
                             previousScores[matchId] = { home: homeScore, away: awayScore };
                         }
+                        localStorage.setItem('msv_previous_scores_v3', JSON.stringify(previousScores));
                     }
-
-                    localStorage.setItem('msv_previous_scores_v3', JSON.stringify(previousScores));
 
                     let matchDateObj = new Date(match.matchDateTime);
                     let dateStr = match.matchDateTime ? match.matchDateTime.split('T')[0] : "";
