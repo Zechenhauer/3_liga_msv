@@ -3,25 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MSV 3. Liga</title>
+    <title>MSV 3. Liga — Live & Management</title>
 
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23070f26%22/><text x=%2250%22 y=%2265%22 font-size=%2255%22 text-anchor=%22middle%22>⚽</text></svg>">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23070f26%22/><text x=%2250%22 y=%2265%22 font-size=%2255%22 text-anchor=%22middle%22>⚽</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23003399%22/><text x=%2250%22 y=%2265%22 font-size=%2255%22 text-anchor=%22middle%22>⚽</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23003399%22/><text x=%2250%22 y=%2265%22 font-size=%2255%22 text-anchor=%22middle%22>⚽</text></svg>">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg-color: #0d1117;
-            --card-bg: #161b22;
-            --text-color: #c9d1d9;
-            --text-muted: #8b949e;
-            --border-color: #30363d;
-            --primary-blue: #003399;
-            --primary-blue-hover: #0044cc;
+            --bg-color: #070b19;
+            --card-bg: #0d1428;
+            --card-inner: #131c38;
+            --text-color: #f0f4f8;
+            --text-muted: #8fa3bf;
+            --border-color: #1f305e;
+            --msv-blue: #003399;
+            --msv-blue-hover: #0044cc;
+            --msv-bright-blue: #388bfd;
+            --msv-gold: #ffd700;
+            --goal-cyan: #00f2fe;
             --accent-green: #2ea043;
             --accent-red: #f85149;
-            --msv-bright-blue: #58a6ff;
-            --msv-gold: #ffcc00;
         }
 
         * { box-sizing: border-box; }
@@ -39,16 +41,16 @@
             width: 100%;
             max-width: 1000px;
             background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            border: 1px solid rgba(56, 139, 253, 0.3);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 51, 153, 0.2);
         }
 
         .banner-box {
-            background: #0d1117;
+            background: #070b19;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 10px;
             margin-bottom: 20px;
             text-align: center;
@@ -62,10 +64,20 @@
             height: auto;
             max-height: 450px;
             object-fit: contain;
-            border-radius: 6px;
+            border-radius: 8px;
             display: block;
             margin: 0 auto;
             transition: opacity 0.8s ease-in-out;
+        }
+
+        .header-banner {
+            background: linear-gradient(135deg, #0d1428 0%, #002060 100%);
+            border: 1px solid var(--msv-blue);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            text-align: center;
+            box-shadow: inset 0 0 25px rgba(56, 139, 253, 0.1), 0 8px 20px rgba(0,0,0,0.4);
         }
 
         .title-row {
@@ -73,55 +85,48 @@
             align-items: center;
             justify-content: center;
             gap: 15px;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             flex-wrap: wrap;
         }
 
         .club-logo {
-            width: 55px;
-            height: auto;
+            width: 52px;
+            height: 52px;
             object-fit: contain;
+            filter: drop-shadow(0 4px 10px rgba(56,139,253,0.3));
         }
 
-        .team-cell-content {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .team-cell-content.right {
-            justify-content: flex-end;
-        }
-        .team-mini-logo {
-            width: 20px;
-            height: 20px;
-            object-fit: contain;
-            flex-shrink: 0;
+        .trainer-logo {
+            width: 52px;
+            height: 64px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 2px solid var(--msv-bright-blue);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
         }
 
         h2 {
-            text-align: center;
             margin: 0;
             color: #ffffff;
-            font-size: 1.6rem;
-            font-weight: 800;
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: 0.8px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
-        h2 span {
+        h2 span { 
             color: var(--msv-bright-blue);
         }
 
         .subtitle {
-            text-align: center;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             color: var(--text-muted);
-            margin-bottom: 10px;
-            font-weight: bold;
+            margin-bottom: 14px;
+            font-weight: 600;
         }
 
         .meta-info {
-            text-align: center;
-            font-size: 0.75rem;
+            font-size: 0.78rem;
             color: var(--text-muted);
-            margin-bottom: 15px;
             display: flex;
             justify-content: center;
             gap: 15px;
@@ -129,65 +134,68 @@
             align-items: center;
         }
 
-        .api-badge {
-            color: #3fb950;
-            background: rgba(46, 160, 67, 0.15);
-            padding: 2px 6px;
-            border-radius: 4px;
-            border: 1px solid rgba(46, 160, 67, 0.3);
-            font-weight: 600;
+        .supabase-badge {
+            color: var(--msv-bright-blue);
+            background: rgba(56, 139, 253, 0.12);
+            padding: 4px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(56, 139, 253, 0.3);
+            font-weight: 700;
+            letter-spacing: 0.3px;
         }
 
-        @keyframes pulse-red {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
+        @keyframes pulse-blue {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.95); }
         }
         .live-badge {
             display: none;
-            color: #ff7b72;
+            color: #f85149;
             background: rgba(248, 81, 73, 0.15);
-            padding: 3px 10px;
-            border-radius: 4px;
+            padding: 4px 12px;
+            border-radius: 8px;
             border: 1px solid rgba(248, 81, 73, 0.4);
-            font-weight: bold;
+            font-weight: 800;
             align-items: center;
             gap: 6px;
             font-size: 0.75rem;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
+            box-shadow: 0 0 15px rgba(248, 81, 73, 0.3);
         }
         .live-dot {
             width: 8px;
             height: 8px;
             background-color: #f85149;
             border-radius: 50%;
-            animation: pulse-red 1.2s infinite;
+            animation: pulse-blue 1.2s infinite;
         }
 
         .section-box {
-            background: #0d1117;
+            background: var(--card-inner);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
         }
 
         .section-header {
-            background-color: var(--primary-blue);
+            background: linear-gradient(90deg, var(--msv-blue) 0%, #0050d0 100%);
             color: #ffffff;
-            border: 1px solid var(--border-color);
-            padding: 10px 15px;
-            font-weight: bold;
-            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 14px 20px;
+            font-weight: 800;
             text-transform: uppercase;
             font-size: 0.9rem;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            letter-spacing: 0.5px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            letter-spacing: 0.8px;
+            box-shadow: 0 6px 18px rgba(0, 51, 153, 0.4);
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 12px;
         }
 
         .header-actions {
@@ -198,37 +206,37 @@
         }
 
         .header-action-btn {
-            background: rgba(0, 0, 0, 0.25);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.25);
             color: #ffffff;
-            padding: 4px 10px;
-            border-radius: 4px;
+            padding: 6px 14px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 0.75rem;
-            font-weight: bold;
-            transition: background 0.2s;
+            font-weight: 700;
+            transition: all 0.2s;
         }
-        .header-action-btn:hover { background: rgba(0, 0, 0, 0.4); }
+        .header-action-btn:hover { background: rgba(255, 255, 255, 0.2); border-color: var(--msv-bright-blue); color: var(--msv-bright-blue); }
 
         .btn-modal-open {
             background: var(--msv-gold);
-            color: #0d1117;
+            color: #070b19;
             border: none;
-            padding: 5px 12px;
-            border-radius: 4px;
+            padding: 6px 14px;
+            border-radius: 8px;
             font-size: 0.75rem;
-            font-weight: bold;
+            font-weight: 800;
             cursor: pointer;
             text-transform: uppercase;
-            transition: background 0.2s;
+            transition: all 0.2s;
         }
-        .btn-modal-open:hover { background: #ffdb4d; }
+        .btn-modal-open:hover { background: #ffe64d; transform: translateY(-1px); }
 
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(4px);
+            background: rgba(7, 11, 25, 0.85);
+            backdrop-filter: blur(8px);
             display: none;
             justify-content: center;
             align-items: center;
@@ -236,43 +244,46 @@
             padding: 15px;
         }
         .modal-card {
-            background: #161b22;
+            background: var(--card-bg);
             border: 1px solid var(--msv-bright-blue);
-            border-radius: 12px;
-            padding: 20px;
+            border-radius: 18px;
+            padding: 24px;
             width: 100%;
             max-width: 650px;
             max-height: 85vh;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(0, 51, 153, 0.3);
         }
         .modal-body {
             overflow-y: auto;
             max-height: 70vh;
+            flex: 1;
         }
+        .modal-body::-webkit-scrollbar { width: 6px; }
+        .modal-body::-webkit-scrollbar-thumb { background: var(--msv-bright-blue); border-radius: 3px; }
 
         .msv-badge-win {
-            background: rgba(46, 160, 67, 0.25);
+            background: rgba(46, 160, 67, 0.2);
             color: #3fb950;
             padding: 3px 8px;
-            border-radius: 4px;
+            border-radius: 6px;
             border: 1px solid rgba(46, 160, 67, 0.4);
             font-weight: bold;
         }
         .msv-badge-draw {
-            background: rgba(227, 179, 64, 0.25);
-            color: #e3b341;
+            background: rgba(255, 215, 0, 0.2);
+            color: var(--msv-gold);
             padding: 3px 8px;
-            border-radius: 4px;
-            border: 1px solid rgba(227, 179, 64, 0.4);
+            border-radius: 6px;
+            border: 1px solid rgba(255, 215, 0, 0.4);
             font-weight: bold;
         }
         .msv-badge-loss {
-            background: rgba(248, 81, 73, 0.25);
+            background: rgba(248, 81, 73, 0.2);
             color: #f85149;
             padding: 3px 8px;
-            border-radius: 4px;
+            border-radius: 6px;
             border: 1px solid rgba(248, 81, 73, 0.4);
             font-weight: bold;
         }
@@ -280,58 +291,59 @@
         .stats-grid-top {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
-            gap: 8px;
-            margin-bottom: 10px;
+            gap: 10px;
+            margin-bottom: 12px;
         }
         @media(max-width: 768px) {
             .stats-grid-top { grid-template-columns: repeat(3, 1fr); }
         }
         .stat-card {
-            background: #11151c;
+            background: #131c38;
             border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 10px 5px;
+            border-radius: 10px;
+            padding: 12px 6px;
             text-align: center;
         }
         .stat-value {
-            font-size: 1.1rem;
-            font-weight: bold;
+            font-size: 1.15rem;
+            font-weight: 800;
             color: #ffffff;
             margin-top: 4px;
         }
         .stat-label {
-            font-size: 0.65rem;
+            font-size: 0.7rem;
             color: var(--text-muted);
             text-transform: uppercase;
+            font-weight: 700;
         }
 
         .stats-grid-bottom {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 10px;
+            gap: 10px;
+            margin-bottom: 12px;
         }
         @media(max-width: 600px) {
             .stats-grid-bottom { grid-template-columns: 1fr; }
         }
         .stat-card-wide {
-            background: #11151c;
+            background: #131c38;
             border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 12px;
+            border-radius: 10px;
+            padding: 14px;
             text-align: center;
         }
         .stat-wide-value {
             font-size: 0.95rem;
-            font-weight: bold;
+            font-weight: 800;
             margin-top: 4px;
         }
 
         .form-row-box {
-            background: #11151c;
+            background: #131c38;
             border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 12px 15px;
+            border-radius: 10px;
+            padding: 14px 18px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -344,39 +356,154 @@
             flex-wrap: wrap;
         }
         .form-circle {
-            width: 26px;
-            height: 26px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 0.75rem;
-            font-weight: bold;
+            font-weight: 800;
             color: #ffffff;
         }
-        .form-circle.win { background: #2ea043; }
-        .form-circle.draw { background: #e3b341; color: #0d1117; }
+        .form-circle.win { background: #3fb950; }
+        .form-circle.draw { background: var(--msv-gold); color: #070b19; }
         .form-circle.loss { background: #f85149; }
 
         .matchday-controls {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 18px;
             font-size: 0.9rem;
+            background: #131c38;
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
         }
 
         .matchday-btn {
-            background: #21262d;
+            background: #1b2850;
             border: 1px solid var(--border-color);
             color: var(--text-color);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+        .matchday-btn:hover { background: var(--msv-blue); border-color: var(--msv-bright-blue); color: #fff; }
+
+        /* SPIELTAGS-KACHELN GRID */
+        .match-grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+            gap: 16px;
+        }
+        @media (max-width: 768px) {
+            .match-grid-container { grid-template-columns: 1fr; }
+        }
+
+        .match-card {
+            background: #131c38;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            transition: all 0.2s;
+        }
+        .match-card:hover { border-color: rgba(56, 139, 253, 0.4); }
+        .match-card.is-draw {
+            border-color: rgba(255, 215, 0, 0.5);
+            box-shadow: 0 4px 18px rgba(255, 215, 0, 0.12);
+        }
+
+        .match-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .match-status-badge {
+            background: rgba(56, 139, 253, 0.15);
+            color: var(--msv-bright-blue);
+            border: 1px solid rgba(56, 139, 253, 0.3);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.68rem;
+            letter-spacing: 0.5px;
+        }
+        .match-status-badge.live { background: rgba(248, 81, 73, 0.2); color: #f85149; border-color: rgba(248, 81, 73, 0.4); }
+        .match-status-badge.ende { background: rgba(46, 160, 67, 0.15); color: #3fb950; border-color: rgba(46, 160, 67, 0.3); }
+
+        .match-row-team {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #090e1f;
+            border: 1px solid #1b2850;
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+        }
+        .match-row-team.winner {
+            border-color: rgba(46, 160, 67, 0.5);
+            background: rgba(46, 160, 67, 0.08);
+        }
+        .match-team-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+        .match-row-team.winner .match-team-info span {
+            color: #3fb950 !important;
+            font-weight: 800;
+        }
+        .match-score-box {
+            background: #162247;
+            border: 1px solid var(--border-color);
+            color: #ffffff;
+            font-weight: 800;
             padding: 6px 12px;
             border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.2s;
+            min-width: 36px;
+            text-align: center;
+            font-size: 0.95rem;
         }
-        .matchday-btn:hover { background: var(--primary-blue-hover); border-color: var(--msv-bright-blue); }
+        .match-row-team.winner .match-score-box {
+            background: rgba(46, 160, 67, 0.2);
+            border-color: #3fb950;
+            color: #3fb950;
+        }
+
+        .match-goals-list {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px dashed var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .goal-item {
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+        .goal-item.home-goal { color: var(--goal-cyan); }
+        .goal-item.away-goal { color: var(--msv-gold); }
+
+        .team-mini-logo {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+            flex-shrink: 0;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
 
         .table-container {
             width: 100%;
@@ -389,42 +516,32 @@
             font-size: 0.85rem;
         }
         th {
-            background-color: var(--primary-blue);
-            color: #ffffff;
-            padding: 10px 8px;
+            background-color: #131c38;
+            color: var(--msv-bright-blue);
+            padding: 14px 12px;
             text-transform: uppercase;
             font-size: 0.75rem;
+            letter-spacing: 0.8px;
             white-space: nowrap;
-            border-bottom: 2px solid var(--border-color);
+            border-bottom: 2px solid var(--msv-blue);
         }
         td {
-            padding: 10px 8px;
+            padding: 14px 12px;
+            vertical-align: middle;
             border-bottom: 1px solid var(--border-color);
-            vertical-align: top;
             white-space: nowrap;
         }
-        tr:hover { background-color: rgba(255,255,255,0.02); }
+        tr:hover { background-color: rgba(56, 139, 253, 0.04); }
 
-        tr.rank-first td {
-            background: rgba(46, 160, 67, 0.12);
-            color: #3fb950;
-        }
-        tr.rank-last td {
-            background: rgba(248, 81, 73, 0.12);
-            color: #f85149;
-        }
-
-        tr.msv-team-row td {
-            font-weight: bold;
-            color: var(--msv-bright-blue);
-            background: rgba(0, 51, 153, 0.25);
-        }
+        tr.rank-first td { background: rgba(56, 139, 253, 0.1); border-top: 1px solid rgba(56, 139, 253, 0.3); border-bottom: 1px solid rgba(56, 139, 253, 0.3); }
+        tr.rank-last td { background: rgba(248, 81, 73, 0.15); border-top: 1px solid rgba(248, 81, 73, 0.35); border-bottom: 1px solid rgba(248, 81, 73, 0.35); }
+        tr.msv-team-row td { font-weight: 800; color: var(--msv-bright-blue); background: rgba(0, 51, 153, 0.25); }
 
         .footer-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 15px;
+            margin-top: 20px;
             gap: 10px;
             flex-wrap: wrap;
         }
@@ -435,77 +552,73 @@
             flex-wrap: wrap;
         }
         .visitor-counter-badge {
-            background: #161b22;
+            background: #131c38;
             border: 1px solid var(--border-color);
             color: var(--text-color);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: bold;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 700;
         }
         .chart-modal-btn {
-            background: #161b22;
+            background: #131c38;
             border: 1px solid var(--border-color);
             color: var(--text-color);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: bold;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
         }
-        .chart-modal-btn:hover {
-            color: var(--msv-bright-blue);
-            border-color: var(--primary-blue);
-        }
+        .chart-modal-btn:hover { color: var(--msv-bright-blue); border-color: var(--msv-bright-blue); }
 
         .admin-toggle-btn {
             background: transparent;
             border: 1px dashed var(--border-color);
             color: var(--text-muted);
-            padding: 6px 12px;
-            border-radius: 6px;
+            padding: 8px 14px;
+            border-radius: 8px;
             font-size: 0.75rem;
             cursor: pointer;
             transition: all 0.2s;
         }
-        .admin-toggle-btn:hover {
-            color: var(--msv-bright-blue);
-            border-color: var(--primary-blue);
-        }
+        .admin-toggle-btn:hover { color: var(--msv-bright-blue); border-color: var(--msv-bright-blue); }
 
         .admin-card {
-            background: #161b22;
-            border: 1px solid var(--primary-blue);
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 15px;
+            background: var(--card-inner);
+            border: 1px solid var(--msv-bright-blue);
+            border-radius: 12px;
+            padding: 18px;
+            margin-top: 18px;
             display: none;
+            box-shadow: 0 8px 25px rgba(0, 51, 153, 0.2);
         }
 
         .btn {
-            background: var(--primary-blue);
+            background: linear-gradient(90deg, var(--msv-blue), var(--msv-bright-blue));
             color: #ffffff;
             border: none;
-            padding: 10px 18px;
-            border-radius: 6px;
-            font-weight: bold;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 800;
             cursor: pointer;
             text-transform: uppercase;
             font-size: 0.85rem;
             width: 100%;
             margin-top: 10px;
-            transition: background 0.2s;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 51, 153, 0.3);
         }
-        .btn:hover { background: var(--primary-blue-hover); }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0, 51, 153, 0.5); }
 
         .btn-danger {
             background: transparent;
             border: none;
-            color: var(--accent-red);
+            color: #f85149;
             cursor: pointer;
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 1.1rem;
         }
         .btn-edit {
             background: transparent;
@@ -520,8 +633,8 @@
             background: rgba(46, 160, 67, 0.2);
             border: 1px solid #3fb950;
             color: #3fb950;
-            padding: 2px 6px;
-            border-radius: 4px;
+            padding: 3px 8px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
             font-size: 0.75rem;
@@ -531,19 +644,19 @@
 
         .admin-box {
             display: none;
-            background: #0d1117;
+            background: #090e1f;
             border: 1px dashed var(--msv-bright-blue);
-            border-radius: 8px;
-            padding: 12px;
+            border-radius: 10px;
+            padding: 14px;
             margin-bottom: 15px;
         }
         .admin-box input, .admin-box select {
-            background: #161b22;
+            background: #131c38;
             border: 1px solid var(--border-color);
             color: var(--text-color);
-            padding: 6px 10px;
-            border-radius: 4px;
-            font-size: 0.8rem;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
             margin-right: 6px;
             margin-bottom: 6px;
         }
@@ -552,43 +665,34 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 8px;
-            font-size: 0.75rem;
+            margin-bottom: 10px;
+            font-size: 0.8rem;
         }
         .chart-label {
-            width: 75px;
+            width: 80px;
             color: var(--text-muted);
             text-align: right;
+            font-weight: 700;
         }
         .chart-bar-bg {
             flex: 1;
-            background: #21262d;
-            border-radius: 4px;
-            height: 18px;
+            background: #1b2850;
+            border-radius: 6px;
+            height: 20px;
             overflow: hidden;
             display: flex;
         }
         .chart-bar-fill {
-            background: var(--msv-bright-blue);
+            background: linear-gradient(90deg, var(--msv-blue), var(--msv-bright-blue));
             height: 100%;
-            border-radius: 4px;
+            border-radius: 6px;
             transition: width 0.5s ease;
         }
         .chart-value {
-            width: 35px;
-            font-weight: bold;
+            width: 40px;
+            font-weight: 800;
             color: #ffffff;
             text-align: left;
-        }
-    
-        /* Größeres, rechteckiges Trainer-Foto */
-        .trainer-logo {
-            width: 70px;
-            height: 85px;
-            object-fit: cover;
-            border-radius: 6px;
-            border: 2px solid var(--msv-bright-blue);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
         }
     </style>
 </head>
@@ -599,18 +703,21 @@
         <img id="bannerSlideshow" src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/banner_msv.png" alt="MSV Diashow" class="banner-img">
     </div>
 
-    <div class="title-row">
-        <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos%202te%20liga/Dietmar%20Hirsch.png" alt="Dietmar Hirsch" class="trainer-logo" title="Trainer Dietmar Hirsch">
-        <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/msv%20logo.png" alt="MSV Logo" class="club-logo">
-        <h2>MSV Duisburg <span>3. Liga</span></h2>
-        <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/msv%20logo.png" alt="MSV Logo" class="club-logo">
-        <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos%202te%20liga/Dietmar%20Hirsch.png" alt="Dietmar Hirsch" class="trainer-logo" title="Trainer Dietmar Hirsch">
-    </div>
-    <div class="subtitle">3. Liga — Spielplan, Live-Tabelle & Ergebnisse via OpenLigaDB</div>
-    <div class="meta-info">
-        <span>⚡ Web-App & Management: Jürgen Schützendorf</span>
-        <span class="api-badge">● Live-Auto-Refresh (30s)</span>
-        <div class="live-badge" id="liveIndicatorBadge"><span class="live-dot"></span> LIVE-SPIELE LÄUFT</div>
+    <!-- HEADER BANNER -->
+    <div class="header-banner">
+        <div class="title-row">
+            <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos%202te%20liga/Dietmar%20Hirsch.png" alt="Dietmar Hirsch" class="trainer-logo" title="Trainer Dietmar Hirsch">
+            <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/msv%20logo.png" alt="MSV Logo" class="club-logo">
+            <h2>MSV Duisburg <span>3. Liga</span></h2>
+            <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/msv%20logo.png" alt="MSV Logo" class="club-logo">
+            <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos%202te%20liga/Dietmar%20Hirsch.png" alt="Dietmar Hirsch" class="trainer-logo" title="Trainer Dietmar Hirsch">
+        </div>
+        <div class="subtitle">Saison 2026/27 (Mit OpenLigaDB Live-Sync)</div>
+        <div class="meta-info">
+            <span>⚡ Web-App & Management: Jürgen Schützendorf</span>
+            <span class="supabase-badge">● OpenLigaDB Live-Ticker Aktiv</span>
+            <div class="live-badge" id="liveIndicatorBadge"><span class="live-dot"></span> LIVE-SPIELE LÄUFT</div>
+        </div>
     </div>
 
     <!-- SAISON-AUSWERTUNG -->
@@ -621,7 +728,7 @@
                 <button class="header-action-btn" onclick="requestPushPermission()">🔔 Push-Alarm</button>
                 <button class="btn-modal-open" onclick="openMsvMatchesModal()">📅 Alle Spiele</button>
                 <button class="btn-modal-open" onclick="openLeagueScorersModal()">⚽ Torjägerliste</button>
-                <button class="btn-modal-open" style="background: #2ea043; color: #fff;" onclick="openMsvScorersModal()">⚽ MSV-Torschützen</button>
+                <button class="btn-modal-open" style="background: #3fb950; color: #fff;" onclick="openMsvScorersModal()">⚽ MSV-Torschützen</button>
             </div>
         </div>
 
@@ -633,41 +740,30 @@
         </div>
     </div>
 
+    <!-- SPIELTAGS-KACHELN -->
     <div class="section-box">
         <div class="section-header">
-            <span id="matchdayTableHeader">Spieltag 1 — Spiele & Ergebnisse</span>
+            <span id="matchdayTableHeader">Spiele & Ergebnisse</span>
             <div class="header-actions">
                 <button class="header-action-btn" onclick="requestPushPermission()">🔔 Push-Alarm</button>
+                <button class="header-action-btn" onclick="fetchAllData(true)">🔄 Aktualisieren & Live</button>
             </div>
         </div>
         <div class="matchday-controls">
-            <button class="matchday-btn" onclick="changeMatchday(-1)">◀ Vorheriger Spieltag</button>
-            <strong id="matchdayDisplay" style="color: var(--msv-bright-blue); font-size: 1.1rem;">Spieltag 1</strong>
-            <button class="matchday-btn" onclick="changeMatchday(1)">Nächster Spieltag ▶</button>
+            <button class="matchday-btn" onclick="changeMatchday(-1)">◀ Vorheriger</button>
+            <strong id="matchdayDisplay" style="color: var(--msv-bright-blue); font-size: 1.1rem;">Spieltag</strong>
+            <button class="matchday-btn" onclick="changeMatchday(1)">Nächster ▶</button>
         </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 130px;">Termin</th>
-                        <th style="text-align: right;">Heimmannschaft</th>
-                        <th style="text-align: center; width: 220px;">Ergebnis / Status</th>
-                        <th>Gastmannschaft</th>
-                    </tr>
-                </thead>
-                <tbody id="matchdayTableBody">
-                    <tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 20px;">Lade Spieldaten von OpenLigaDB...</td></tr>
-                </tbody>
-            </table>
+        
+        <div id="matchdayCardsContainer" class="match-grid-container">
+            <div style="text-align: center; color: var(--text-muted); padding: 20px; grid-column: 1/-1;">Lade Spieldaten von OpenLigaDB...</div>
         </div>
     </div>
 
+    <!-- GESAMT-TABELLE -->
     <div class="section-box">
         <div class="section-header">
-            <span>3. Liga Tabelle (Gesamt)</span>
-            <div class="header-actions">
-                <button class="header-action-btn" onclick="requestPushPermission()">🔔 Push-Alarm</button>
-            </div>
+            <span>3. Liga-Tabelle (Gesamt)</span>
         </div>
         <div class="table-container">
             <table>
@@ -689,20 +785,20 @@
                 </tbody>
             </table>
         </div>
-        <div style="display: flex; gap: 15px; margin-top: 10px; font-size: 0.75rem; color: var(--text-muted);">
-            <div style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(46, 160, 67, 0.2); border-radius: 2px; display: inline-block;"></span> Aufstiegsplatz (2. Bundesliga)</div>
-            <div style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(248, 81, 73, 0.2); border-radius: 2px; display: inline-block;"></span> Abstiegsplatz (Regionalliga)</div>
+        <div style="display: flex; gap: 15px; margin-top: 14px; font-size: 0.75rem; color: var(--text-muted); flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 6px;"><span style="width: 12px; height: 12px; background: rgba(56, 139, 253, 0.3); border-radius: 3px; display: inline-block;"></span> Aufstieg (2. Bundesliga)</div>
+            <div style="display: flex; align-items: center; gap: 6px;"><span style="width: 12px; height: 12px; background: rgba(248, 81, 73, 0.35); border-radius: 3px; display: inline-block;"></span> Abstieg (Regionalliga)</div>
         </div>
     </div>
 
     <!-- ADMIN BEREICH -->
     <div class="admin-card" id="adminCard">
         <div style="font-weight: bold; color: var(--msv-bright-blue); margin-bottom: 12px; text-transform: uppercase; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
-            <span>✏️ Admin-Testbereich</span>
-            <span style="font-size: 0.7rem; color: #3fb950;">● Admin-Modus Aktiv</span>
+            <span>🔧 Admin-Testbereich</span>
+            <span style="font-size: 0.7rem; color: var(--msv-bright-blue);">● Admin-Modus Aktiv</span>
         </div>
-        <button class="btn" style="background: #238636;" onclick="sendTestPush()">🚀 Test-Push Benachrichtigung senden</button>
-        <button class="btn" style="background: #e3b341; color: #0d1117;" onclick="simulateLiveGoal()">⚡ Live-Tor simulieren (Test)</button>
+        <button class="btn" onclick="sendTestPush()">🚀 Test-Push Benachrichtigung senden</button>
+        <button class="btn" style="background: var(--msv-gold); color: #070b19;" onclick="simulateLiveGoal()">⚡ Live-Tor simulieren (Test)</button>
     </div>
 
     <div class="footer-row">
@@ -741,13 +837,11 @@
     </div>
 </div>
 
-<!-- POPUP MODAL: TORJÄGERLISTE (GESAMT) + ADMIN -->
+<!-- TORSCHÜTZEN MODAL (GESAMT) -->
 <div class="modal-overlay" id="leagueScorersModal">
     <div class="modal-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-            <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff; display: flex; align-items: center; gap: 10px;">
-                <span>⚽ Torjäger — 3. Liga</span>
-            </div>
+            <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff;">⚽ Torjägerliste — 3. Liga</div>
             <button class="btn-danger" onclick="closeLeagueScorersModal()">✕</button>
         </div>
         <div class="modal-body">
@@ -756,18 +850,17 @@
                 <div style="display: flex; flex-wrap: wrap; gap: 6px;">
                     <input type="text" id="manualPlayerNameLeague" placeholder="Spielername" style="flex: 2; min-width: 130px;">
                     <select id="manualTeamSelectLeague" style="flex: 2; min-width: 130px;"></select>
-                    <input type="number" id="manualSpieleLeague" value="9" min="0" max="38" style="width: 55px; text-align: center;" title="Spiele (Sp)">
+                    <input type="number" id="manualSpieleLeague" value="9" min="0" max="38" style="width: 55px; text-align: center;" title="Spiele">
                     <input type="number" id="manualToreLeague" value="1" min="1" max="50" style="width: 55px; text-align: center;" title="Tore">
                     <button class="btn-modal-open" onclick="saveScorerToSupabase('league')">Speichern</button>
                 </div>
             </div>
-
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
                             <th style="width: 35px; text-align: center;">#</th>
-                            <th>Spieler</th>
+                            <th>Spieler & Verein</th>
                             <th style="text-align: center; width: 50px;">Sp</th>
                             <th style="text-align: center; width: 60px;">Tore</th>
                             <th style="width: 90px; text-align: center;">Aktion</th>
@@ -783,13 +876,11 @@
     </div>
 </div>
 
-<!-- POPUP MODAL: MSV TORSCHÜTZEN + ADMIN -->
+<!-- MSV TORSCHÜTZEN MODAL -->
 <div class="modal-overlay" id="msvScorersModal">
     <div class="modal-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-            <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff; display: flex; align-items: center; gap: 10px;">
-                <span>⚽ MSV Torjäger — MSV Duisburg</span>
-            </div>
+            <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff;">⚽ MSV Torjäger — MSV Duisburg</div>
             <button class="btn-danger" onclick="closeMsvScorersModal()">✕</button>
         </div>
         <div class="modal-body">
@@ -797,12 +888,11 @@
                 <div style="font-size: 0.8rem; font-weight: bold; color: var(--msv-bright-blue); margin-bottom: 8px;">➕ MSV Torschütze hinzufügen (Admin):</div>
                 <div style="display: flex; flex-wrap: wrap; gap: 6px;">
                     <input type="text" id="manualPlayerNameMsv" placeholder="Spielername" style="flex: 2; min-width: 140px;">
-                    <input type="number" id="manualSpieleMsv" value="9" min="0" max="38" style="width: 55px; text-align: center;" title="Spiele (Sp)">
+                    <input type="number" id="manualSpieleMsv" value="9" min="0" max="38" style="width: 55px; text-align: center;" title="Spiele">
                     <input type="number" id="manualToreMsv" value="1" min="1" max="50" style="width: 55px; text-align: center;" title="Tore">
                     <button class="btn-modal-open" onclick="saveScorerToSupabase('msv')">Speichern</button>
                 </div>
             </div>
-
             <div class="table-container">
                 <table>
                     <thead>
@@ -854,7 +944,7 @@
     let teamLogos = {};
     let allTeamNames = [];
     
-    let previousScores = JSON.parse(localStorage.getItem('msv_previous_scores') || '{}');
+    let previousScores = JSON.parse(localStorage.getItem('msv_previous_scores_v3') || '{}');
     let isInitialLoad = true;
 
     const msvBannerImages = [
@@ -896,7 +986,6 @@
             alert("Push-Benachrichtigungen werden von diesem Browser leider nicht unterstützt.");
             return;
         }
-        
         try {
             const permission = await Notification.requestPermission();
             if (permission !== 'granted') {
@@ -908,7 +997,6 @@
             await registration.ready;
 
             const publicVapidKey = 'BAsnfWgySLti5LzulXfN-xI-x7UDV32LO98YXgg1qdoRY1E1Tl05QPgCvOMgfwe80cSv_K7336-dhJTgBkHUI70';
-            
             const subscription = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
@@ -923,11 +1011,8 @@
                 auth: auth
             }, { onConflict: 'endpoint' });
 
-            if (error) {
-                alert("Fehler in Supabase: " + error.message);
-            } else {
-                alert("Push-Alarm für MSV Duisburg erfolgreich aktiviert!");
-            }
+            if (error) alert("Fehler in Supabase: " + error.message);
+            else alert("Push-Alarm für MSV Duisburg erfolgreich aktiviert!");
         } catch (error) {
             alert("Fehler beim Aktivieren der Benachrichtigung: " + error.message);
         }
@@ -942,15 +1027,12 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     table: 'push_subscriptions_msv',
-                    title: "⚽ MSV Duisburg Test-Alarm",
+                    title: "⚽ MSV Test-Alarm",
                     body: "Das Test-Tor für den MSV wurde erfolgreich ausgelöst!"
                 })
             });
-            if (response.ok) {
-                alert("Test-Push erfolgreich ausgelöst!");
-            } else {
-                alert("Fehler beim Senden.");
-            }
+            if (response.ok) alert("Test-Push erfolgreich ausgelöst!");
+            else alert("Fehler beim Senden.");
         } catch (e) {
             alert("Netzwerkfehler: " + e.message);
         }
@@ -1107,14 +1189,13 @@
                                 let lastGoalObj = (match.goals && match.goals.length > 0) ? match.goals[match.goals.length - 1] : null;
                                 let scorer = lastGoalObj ? lastGoalObj.goalGetterName : '';
                                 let min = lastGoalObj ? lastGoalObj.matchMinute : '';
-
                                 triggerAutomaticGoalPush(homeTeam, awayTeam, homeScore, awayScore, scorer, min);
                             }
                             previousScores[matchId] = { home: homeScore, away: awayScore };
                         }
                     }
 
-                    localStorage.setItem('msv_previous_scores', JSON.stringify(previousScores));
+                    localStorage.setItem('msv_previous_scores_v3', JSON.stringify(previousScores));
 
                     let matchDateObj = new Date(match.matchDateTime);
                     let dateStr = match.matchDateTime ? match.matchDateTime.split('T')[0] : "";
@@ -1137,7 +1218,9 @@
                         time: timeStr,
                         homeScore: homeScore,
                         awayScore: awayScore,
-                        isFinished: match.matchIsFinished
+                        isFinished: match.matchIsFinished,
+                        isLive: isCurrentlyLive,
+                        dateTime: match.matchDateTime
                     });
                 });
             }
@@ -1146,9 +1229,7 @@
             populateTeamSelect();
 
             let liveBadge = document.getElementById('liveIndicatorBadge');
-            if (liveBadge) {
-                liveBadge.style.display = hasLiveMatches ? 'flex' : 'none';
-            }
+            if (liveBadge) liveBadge.style.display = hasLiveMatches ? 'flex' : 'none';
 
             if (isInitialLoad) {
                 currentMatchday = nearestMatchday;
@@ -1183,21 +1264,17 @@
             let res = await fetch(`https://api.openligadb.de/getmatchdata/${matchID}`);
             let matchData = await res.json();
             
-            let homeGoals = [];
-            let awayGoals = [];
-            
+            let matchGoals = [];
             let rawGoals = matchData.goals || matchData.matchGoals || [];
-            if (Array.isArray(rawGoals)) {
+            if (Array.isArray(rawGoals) && rawGoals.length > 0) {
                 rawGoals.sort((a, b) => (a.matchMinute || 0) - (b.matchMinute || 0));
 
                 let prevH = 0;
                 let prevA = 0;
 
                 rawGoals.forEach(g => {
-                    let name = g.goalGetterName || "Tor";
-                    let min = (g.matchMinute !== undefined && g.matchMinute !== null) ? g.matchMinute : '';
-                    let minStr = min !== '' ? `${min}''` : '';
-                    let goalText = `⚽ ${name} (${minStr})`;
+                    let playerName = g.goalGetterName || "Tor";
+                    let clock = (g.matchMinute !== undefined && g.matchMinute !== null) ? g.matchMinute : '';
                     
                     let currH = g.scoreTeam1 ?? prevH;
                     let currA = g.scoreTeam2 ?? prevA;
@@ -1209,48 +1286,36 @@
                         isHomeGoal = false;
                     } else if (matchData.team1 && g.teamID === matchData.team1.teamID) {
                         isHomeGoal = true;
-                    } else if (matchData.team2 && g.teamID === matchData.team2.teamID) {
-                        isHomeGoal = false;
                     } else {
-                        isHomeGoal = true;
+                        isHomeGoal = false;
                     }
 
                     prevH = currH;
                     prevA = currA;
 
-                    if (isHomeGoal) {
-                        homeGoals.push(goalText);
-                    } else {
-                        awayGoals.push(goalText);
-                    }
+                    let scorePrefix = `[${currH}:${currA}]`;
+                    let teamName = isHomeGoal ? homeTeamName : awayTeamName;
+                    let goalText = clock ? `${teamName}: ${playerName} (${clock}')` : `${teamName}: ${playerName}`;
+
+                    matchGoals.push({
+                        text: `⚽ ${scorePrefix} ${goalText}`,
+                        isHome: isHomeGoal
+                    });
                 });
             }
-            let details = { home: homeGoals, away: awayGoals };
-            detailedGoalsCache[matchID] = details;
-            return details;
+            detailedGoalsCache[matchID] = matchGoals;
+            return matchGoals;
         } catch (e) {
-            return { home: [], away: [] };
+            return [];
         }
     }
 
-    function getTeamHtml(teamName, alignRight = false, isHighlighted = false, goals = []) {
-        let logoUrl = teamLogos[teamName.trim().toLowerCase()];
-        let logoHtml = logoUrl ? `<img src="${logoUrl}" alt="${teamName}" class="team-mini-logo">` : '';
-        let nameStyle = isHighlighted ? 'color: var(--msv-bright-blue); font-weight: bold;' : '';
-
-        let goalsHtml = '';
-        if (goals && goals.length > 0) {
-            let alignmentStyle = alignRight ? 'text-align: right;' : 'text-align: left;';
-            let indentStyle = alignRight ? 'padding-right: 28px;' : 'padding-left: 28px;';
-            let goalsText = goals.join('<br>');
-            goalsHtml = `<div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; line-height: 1.3; ${alignmentStyle} ${indentStyle}">${goalsText}</div>`;
-        }
-
-        if (alignRight) {
-            return `<div style="display: flex; flex-direction: column;"><div class="team-cell-content right"><span style="${nameStyle}">${teamName}</span>${logoHtml}</div>${goalsHtml}</div>`;
-        } else {
-            return `<div style="display: flex; flex-direction: column;"><div class="team-cell-content">${logoHtml}<span style="${nameStyle}">${teamName}</span></div>${goalsHtml}</div>`;
-        }
+    function getTeamHtml(teamName, isWinner = false) {
+        let logoUrl = teamLogos[teamName.trim().toLowerCase()] || "";
+        let logoHtml = logoUrl ? '<img src="' + logoUrl + '" alt="' + teamName + '" class="team-mini-logo">' : '';
+        let nameStyle = isWinner ? 'font-weight: 800; color: #3fb950;' : 'font-weight: 500; color: var(--text-muted);';
+        if (teamName.includes("MSV Duisburg")) nameStyle = 'font-weight: 800; color: var(--msv-bright-blue);';
+        return `<div class="match-team-info">${logoHtml}<span style="${nameStyle}">${teamName}</span></div>`;
     }
 
     function changeMatchday(amount) {
@@ -1262,50 +1327,78 @@
         document.getElementById('matchdayDisplay').textContent = `Spieltag ${currentMatchday}`;
         document.getElementById('matchdayTableHeader').textContent = `Spieltag ${currentMatchday} — Spiele & Ergebnisse`;
         
-        renderMatchdayTable();
+        renderMatchdayCards();
         renderTable();
         renderMsvStats();
     }
 
-    async function renderMatchdayTable() {
-        let tbody = document.getElementById('matchdayTableBody');
-        tbody.innerHTML = '';
+    async function renderMatchdayCards() {
+        let container = document.getElementById('matchdayCardsContainer');
+        container.innerHTML = '';
         
         let existingMatches = openLigaMatches[currentMatchday] || [];
         if (existingMatches.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 20px;">Keine Spiele für Spieltag ${currentMatchday} gefunden.</td></tr>`;
+            container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px; grid-column: 1/-1;">Keine Spiele für Spieltag ' + currentMatchday + ' gefunden.</div>';
             return;
         }
 
         for (let m of existingMatches) {
             let hasResult = m.homeScore !== undefined && m.homeScore !== null && m.awayScore !== undefined && m.awayScore !== null;
             let formattedDate = m.date ? m.date.split('-').reverse().join('.') : '-';
-            let timeStr = m.time ? ` ${m.time} Uhr` : '';
-            
-            let isHomeMSV = m.home.includes("MSV Duisburg");
-            let isAwayMSV = m.away.includes("MSV Duisburg");
+            let timeStr = m.time ? ' — ' + m.time + ' UHR' : '';
 
-            let resultDisplay = hasResult ? `<strong>${m.homeScore}:${m.awayScore}</strong>` : `<span style="color: var(--text-muted); font-style: italic;">vs</span>`;
-
-            if (hasResult && m.isFinished) {
-                resultDisplay += '<div style="font-size: 0.65rem; color: #3fb950; margin-top: 2px;">(Endstand)</div>';
-            } else if (hasResult) {
-                resultDisplay += '<div style="font-size: 0.65rem; color: #e3b341; margin-top: 2px;">(Live)</div>';
+            let statusBadge = '<span class="match-status-badge">ANSETZUNG</span>';
+            if (m.isLive) {
+                statusBadge = '<span class="match-status-badge live">🔴 LIVE</span>';
+            } else if (m.isFinished) {
+                statusBadge = '<span class="match-status-badge ende">ENDE</span>';
             }
 
-            let matchGoals = { home: [], away: [] };
+            let isHomeWinner = false;
+            let isAwayWinner = false;
+            let isDraw = false;
+
+            if (hasResult && (m.isFinished || m.isLive)) {
+                if (m.homeScore > m.awayScore) isHomeWinner = true;
+                else if (m.homeScore < m.awayScore) isAwayWinner = true;
+                else isDraw = true;
+            }
+
+            let homeScoreDisplay = hasResult ? m.homeScore : '-';
+            let awayScoreDisplay = hasResult ? m.awayScore : '-';
+
+            let goalsArr = [];
             if (hasResult) {
-                matchGoals = await fetchMatchDetails(m.matchID, m.home, m.away);
+                goalsArr = await fetchMatchDetails(m.matchID, m.home, m.away);
             }
 
-            let tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td style="font-size: 0.8rem; color: #ffffff; font-weight: 500;">${formattedDate}${timeStr}</td>
-                <td style="text-align: right;">${getTeamHtml(m.home, true, isHomeMSV, matchGoals.home)}</td>
-                <td style="text-align: center; vertical-align: middle;">${resultDisplay}</td>
-                <td>${getTeamHtml(m.away, false, isAwayMSV, matchGoals.away)}</td>
+            let goalsHtml = '';
+            if (Array.isArray(goalsArr) && goalsArr.length > 0) {
+                let formattedGoals = goalsArr.map(gObj => {
+                    let goalClass = gObj.isHome ? 'home-goal' : 'away-goal';
+                    return `<div class="goal-item ${goalClass}">${gObj.text}</div>`;
+                }).join('');
+                goalsHtml = `<div class="match-goals-list">${formattedGoals}</div>`;
+            }
+
+            let card = document.createElement('div');
+            card.className = 'match-card' + (isDraw ? ' is-draw' : '');
+            card.innerHTML = `
+                <div class="match-card-header">
+                    <span>${formattedDate}${timeStr}</span>
+                    ${statusBadge}
+                </div>
+                <div class="match-row-team ${isHomeWinner ? 'winner' : ''}">
+                    ${getTeamHtml(m.home, isHomeWinner)}
+                    <div class="match-score-box">${homeScoreDisplay}</div>
+                </div>
+                <div class="match-row-team ${isAwayWinner ? 'winner' : ''}">
+                    ${getTeamHtml(m.away, isAwayWinner)}
+                    <div class="match-score-box">${awayScoreDisplay}</div>
+                </div>
+                ${goalsHtml}
             `;
-            tbody.appendChild(tr);
+            container.appendChild(card);
         }
     }
 
@@ -1334,18 +1427,11 @@
                 stats[a].goalsAgainst += m.homeScore;
 
                 if (m.homeScore > m.awayScore) {
-                    stats[h].won++;
-                    stats[h].points += 3;
-                    stats[a].lost++;
+                    stats[h].won++; stats[h].points += 3; stats[a].lost++;
                 } else if (m.homeScore < m.awayScore) {
-                    stats[a].won++;
-                    stats[a].points += 3;
-                    stats[h].lost++;
+                    stats[a].won++; stats[a].points += 3; stats[h].lost++;
                 } else {
-                    stats[h].draw++;
-                    stats[h].points += 1;
-                    stats[a].draw++;
-                    stats[a].points += 1;
+                    stats[h].draw++; stats[h].points += 1; stats[a].draw++; stats[a].points += 1;
                 }
             });
         });
@@ -1365,16 +1451,17 @@
 
         sorted.forEach((s, idx) => {
             let tr = document.createElement('tr');
-            if (idx === 0 || idx === 1) tr.classList.add('rank-first');
-            else if (idx >= sorted.length - 4 && sorted.length > 4) tr.classList.add('rank-last');
+            let rank = idx + 1;
+            if (rank <= 2) tr.classList.add('rank-first');
+            else if (rank >= sorted.length - 3 && sorted.length > 4) tr.classList.add('rank-last');
             if (s.name.includes("MSV Duisburg")) tr.classList.add('msv-team-row');
 
             let diff = s.goalsFor - s.goalsAgainst;
-            let logoUrl = teamLogos[s.name.trim().toLowerCase()];
-            let logoHtml = logoUrl ? `<img src="${logoUrl}" alt="${s.name}" class="team-mini-logo">` : '';
+            let logoUrl = teamLogos[s.name.trim().toLowerCase()] || "";
+            let logoHtml = logoUrl ? '<img src="' + logoUrl + '" alt="' + s.name + '" class="team-mini-logo">' : '';
 
             tr.innerHTML = `
-                <td><strong>${idx + 1}.</strong></td>
+                <td><strong>${rank}.</strong></td>
                 <td><div style="display: flex; align-items: center; gap: 8px;">${logoHtml}<span>${s.name}</span></div></td>
                 <td style="text-align: center;">${s.played}</td>
                 <td style="text-align: center;">${s.won}</td>
@@ -1437,7 +1524,7 @@
         document.getElementById('msvTopStatsGrid').innerHTML = `
             <div class="stat-card"><div class="stat-label">Spiele</div><div class="stat-value">${played}</div></div>
             <div class="stat-card"><div class="stat-label">Siege</div><div class="stat-value" style="color: #3fb950;">${won}</div></div>
-            <div class="stat-card"><div class="stat-label">Remis</div><div class="stat-value" style="color: #e3b341;">${draw}</div></div>
+            <div class="stat-card"><div class="stat-label">Remis</div><div class="stat-value" style="color: var(--msv-gold);">${draw}</div></div>
             <div class="stat-card"><div class="stat-label">Niederlagen</div><div class="stat-value" style="color: #f85149;">${lost}</div></div>
             <div class="stat-card"><div class="stat-label">Tore</div><div class="stat-value">${goalsFor}:${goalsAgainst}</div></div>
             <div class="stat-card"><div class="stat-label">Punkte</div><div class="stat-value">${points}</div></div>
@@ -1506,9 +1593,9 @@
                 tr.innerHTML = `
                     <td style="text-align: center; color: var(--msv-bright-blue); font-weight: bold;">ST ${m.matchday}</td>
                     <td style="font-size: 0.8rem; color: var(--text-muted);">${formattedDate}</td>
-                    <td style="text-align: right;">${getTeamHtml(homeDisplay, true)}</td>
+                    <td style="text-align: right;">${homeDisplay}</td>
                     <td style="text-align: center;">${resultDisplay}</td>
-                    <td>${getTeamHtml(awayDisplay, false)}</td>
+                    <td>${awayDisplay}</td>
                 `;
                 modalBody.appendChild(tr);
             });
@@ -1536,15 +1623,11 @@
         tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Lade Torjägerliste...</td></tr>`;
 
         let query = supabaseClient.from('msv_manuelle_torschuetzen').select('*').order('tore', { ascending: false });
-        if (onlyMsv) {
-            query = query.ilike('team', '%MSV Duisburg%');
-        }
+        if (onlyMsv) query = query.ilike('team', '%MSV Duisburg%');
 
         let { data, error } = await query;
-
         if (error) {
-            console.error("Fehler beim Laden:", error);
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--accent-red); padding: 20px;">Fehler beim Laden.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #f85149; padding: 20px;">Fehler beim Laden.</td></tr>`;
             return;
         }
 
@@ -1556,33 +1639,28 @@
 
         data.forEach((s, idx) => {
             let tr = document.createElement('tr');
-            
-            // Vereinslogo für den Torschützen ermitteln
             let logoUrl = teamLogos[s.team.trim().toLowerCase()] || '';
             let teamLogoHtml = logoUrl ? `<img src="${logoUrl}" alt="${s.team}" class="team-mini-logo" style="width: 14px; height: 14px; vertical-align: middle; margin-left: 4px;">` : '';
 
             let actionsHtml = '';
             if (isAdmin) {
                 actionsHtml = `
-                    <button class="btn-plus" onclick="addGoalToPlayer(${s.id}, ${s.tore}, ${onlyMsv})" title="1 Tor hinzufügen (+1)">+1 ⚽</button>
-                    <button class="btn-edit" onclick="editScorer(${s.id}, '${s.name}', ${s.tore}, ${onlyMsv})" title="Tore manuell anpassen">✏️</button>
-                    <button class="btn-danger" onclick="deleteScorerFromSupabase(${s.id}, ${onlyMsv})" title="Löschen">🗑️</button>
+                    <button class="btn-plus" onclick="addGoalToPlayer(${s.id}, ${s.tore}, ${onlyMsv})">+1 ⚽</button>
+                    <button class="btn-edit" onclick="editScorer(${s.id}, '${s.name}', ${s.tore}, ${onlyMsv})">✏️</button>
+                    <button class="btn-danger" onclick="deleteScorerFromSupabase(${s.id}, ${onlyMsv})">🗑️</button>
                 `;
             }
 
-            let rawRank = idx + 1;
-            let rankDisplay = onlyMsv ? rawRank : (rawRank <= 10 ? rawRank : '');
-
             tr.innerHTML = `
-                <td style="text-align: center; font-weight: bold; color: var(--msv-bright-blue);">${rankDisplay}</td>
+                <td style="text-align: center; font-weight: bold; color: var(--msv-bright-blue);">${idx + 1}</td>
                 <td>
-                    <div style="font-weight: bold; color: #ffffff;">${s.name}</div>
-                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; display: flex; align-items: center; gap: 4px;">
+                    <div style="font-weight: 800; color: #ffffff; font-size: 0.95rem;">${s.name}</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 3px; display: flex; align-items: center; gap: 4px;">
                         <span>${s.team}</span>${teamLogoHtml}
                     </div>
                 </td>
                 <td style="text-align: center; color: var(--text-color);">${s.spiele}</td>
-                <td style="text-align: center; font-weight: bold; color: #3fb950; font-size: 1.1rem;">${s.tore}</td>
+                <td style="text-align: center; font-weight: bold; color: #3fb950; font-size: 1.15rem;">${s.tore}</td>
                 <td style="text-align: center; white-space: nowrap;">${actionsHtml}</td>
             `;
             tbody.appendChild(tr);
@@ -1590,43 +1668,22 @@
     }
 
     async function addGoalToPlayer(id, currentGoals, onlyMsv) {
-        let newGoals = currentGoals + 1;
-        let { error } = await supabaseClient
-            .from('msv_manuelle_torschuetzen')
-            .update({ tore: newGoals })
-            .eq('id', id);
-
-        if (error) {
-            alert("Fehler beim Aktualisieren: " + error.message);
-        } else {
-            await loadScorersFromSupabase(onlyMsv);
-        }
+        let { error } = await supabaseClient.from('msv_manuelle_torschuetzen').update({ tore: currentGoals + 1 }).eq('id', id);
+        if (!error) await loadScorersFromSupabase(onlyMsv);
     }
 
     async function editScorer(id, currentName, currentGoals, onlyMsv) {
         let input = prompt(`Neue Anzahl Tore für ${currentName} eingeben:`, currentGoals);
         if (input === null) return;
         let newGoals = parseInt(input);
-        if (isNaN(newGoals) || newGoals < 0) {
-            alert("Bitte eine gültige Zahl eingeben!");
-            return;
-        }
-
-        let { error } = await supabaseClient
-            .from('msv_manuelle_torschuetzen')
-            .update({ tore: newGoals })
-            .eq('id', id);
-
-        if (error) {
-            alert("Fehler beim Speichern: " + error.message);
-        } else {
-            await loadScorersFromSupabase(onlyMsv);
+        if (!isNaN(newGoals) && newGoals >= 0) {
+            let { error } = await supabaseClient.from('msv_manuelle_torschuetzen').update({ tore: newGoals }).eq('id', id);
+            if (!error) await loadScorersFromSupabase(onlyMsv);
         }
     }
 
     async function saveScorerToSupabase(mode) {
         let name, team, spiele, tore;
-
         if (mode === 'league') {
             name = document.getElementById('manualPlayerNameLeague').value.trim();
             team = document.getElementById('manualTeamSelectLeague').value;
@@ -1639,45 +1696,24 @@
             tore = parseInt(document.getElementById('manualToreMsv').value) || 1;
         }
 
-        if (!name) {
-            alert("Bitte gib einen Spielernamen ein!");
-            return;
-        }
+        if (!name) return alert("Bitte gib einen Spielernamen ein!");
 
-        let { error } = await supabaseClient
-            .from('msv_manuelle_torschuetzen')
-            .insert([{ name: name, team: team, spiele: spiele, tore: tore }]);
-
-        if (error) {
-            console.error("Fehler beim Speichern:", error);
-            alert("Fehler beim Speichern in Supabase.");
-            return;
-        }
-
-        if (mode === 'league') {
-            document.getElementById('manualPlayerNameLeague').value = '';
-            await loadScorersFromSupabase(false);
-        } else {
-            document.getElementById('manualPlayerNameMsv').value = '';
-            await loadScorersFromSupabase(true);
+        let { error } = await supabaseClient.from('msv_manuelle_torschuetzen').insert([{ name: name, team: team, spiele: spiele, tore: tore }]);
+        if (!error) {
+            if (mode === 'league') {
+                document.getElementById('manualPlayerNameLeague').value = '';
+                await loadScorersFromSupabase(false);
+            } else {
+                document.getElementById('manualPlayerNameMsv').value = '';
+                await loadScorersFromSupabase(true);
+            }
         }
     }
 
     async function deleteScorerFromSupabase(id, onlyMsv) {
         if (!confirm("Möchtest du diesen Torschützen wirklich löschen?")) return;
-
-        let { error } = await supabaseClient
-            .from('msv_manuelle_torschuetzen')
-            .delete()
-            .eq('id', id);
-
-        if (error) {
-            console.error("Fehler beim Löschen:", error);
-            alert("Fehler beim Löschen.");
-            return;
-        }
-
-        await loadScorersFromSupabase(onlyMsv);
+        let { error } = await supabaseClient.from('msv_manuelle_torschuetzen').delete().eq('id', id);
+        if (!error) await loadScorersFromSupabase(onlyMsv);
     }
 
     window.onclick = function(e) {
