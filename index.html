@@ -1049,6 +1049,13 @@
 
     async function triggerAutomaticGoalPush(home, away, hScore, aScore, scorerName = '', minute = '') {
         try {
+            let matchKey = `msv_st_${currentMatchday}_${home}_vs_${away}`;
+            let pushKey = `pushed_${matchKey}_${hScore}_${aScore}`;
+            let alreadyPushed = localStorage.getItem(pushKey) === 'true';
+
+            if (alreadyPushed) return;
+            localStorage.setItem(pushKey, 'true');
+
             let detail = scorerName ? 'Tor durch ' + scorerName : "Tor!";
             if (minute) detail += ' (' + minute + '. Min)';
 
@@ -1189,7 +1196,6 @@
                         }
                     }
 
-                    // --- LIGAWEITE TOR-ERKENNUNG FÜR ALLE SPIELE ---
                     if (homeScore !== null && awayScore !== null) {
                         let prev = previousScores[matchId];
                         if (prev === undefined) {
@@ -1743,7 +1749,9 @@
     fetchAllData();
 
     setInterval(() => {
-        fetchAllData(false);
+        if (!isAdmin) {
+            fetchAllData(false);
+        }
     }, 30000);
 </script>
 
