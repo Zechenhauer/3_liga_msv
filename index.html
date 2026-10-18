@@ -537,6 +537,12 @@
         tr.rank-last td { background: rgba(248, 81, 73, 0.15); border-top: 1px solid rgba(248, 81, 73, 0.35); border-bottom: 1px solid rgba(248, 81, 73, 0.35); }
         tr.msv-team-row td { font-weight: 800; color: var(--msv-bright-blue); background: rgba(0, 51, 153, 0.25); }
 
+        .clickable-team {
+            cursor: pointer;
+            transition: color 0.2s, text-decoration 0.2s;
+        }
+        .clickable-team:hover { color: #ffffff; text-decoration: underline; }
+
         .footer-row {
             display: flex;
             justify-content: space-between;
@@ -726,7 +732,7 @@
             <span>MSV Duisburg — Saison-Auswertung</span>
             <div class="header-actions">
                 <button class="header-action-btn" onclick="requestPushPermission()">🔔 Push-Alarm</button>
-                <button class="btn-modal-open" onclick="openMsvMatchesModal()">📅 Alle Spiele</button>
+                <button class="btn-modal-open" onclick="openTeamMatchesModal('MSV Duisburg')">📅 Alle Spiele</button>
                 <button class="btn-modal-open" onclick="openLeagueScorersModal()">⚽ Torjägerliste</button>
                 <button class="btn-modal-open" style="background: #3fb950; color: #fff;" onclick="openMsvScorersModal()">⚽ MSV-Torschützen</button>
             </div>
@@ -764,6 +770,10 @@
     <div class="section-box">
         <div class="section-header">
             <span>3. Liga-Tabelle (Gesamt)</span>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-color); margin-bottom: 12px; background: rgba(56, 139, 253, 0.08); padding: 10px 12px; border-radius: 6px; border-left: 3px solid var(--msv-bright-blue); display: flex; align-items: center; gap: 8px;">
+            <span>💡</span>
+            <span><strong>Tipp:</strong> Klicke in der Tabelle auf einen beliebigen Vereinsnamen, um alle Saisonspiele des jeweiligen Teams anzuzeigen![cite: 2]</span>
         </div>
         <div class="table-container">
             <table>
@@ -814,7 +824,7 @@
 <div class="modal-overlay" id="msvMatchesModal">
     <div class="modal-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-            <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff;">📅 MSV Duisburg — Alle Saisonspiele</div>
+            <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff;" id="modalTeamTitle">📅 Saisonspiele</div>
             <button class="btn-danger" onclick="closeMsvMatchesModal()">✕</button>
         </div>
         <div class="modal-body">
@@ -1315,7 +1325,7 @@
         let logoHtml = logoUrl ? '<img src="' + logoUrl + '" alt="' + teamName + '" class="team-mini-logo">' : '';
         let nameStyle = isWinner ? 'font-weight: 800; color: #3fb950;' : 'font-weight: 500; color: var(--text-muted);';
         if (teamName.includes("MSV Duisburg")) nameStyle = 'font-weight: 800; color: var(--msv-bright-blue);';
-        return `<div class="match-team-info">${logoHtml}<span style="${nameStyle}">${teamName}</span></div>`;
+        return `<div class="match-team-info">${logoHtml}<span class="clickable-team" style="${nameStyle}" onclick="openTeamMatchesModal('${teamName}')">${teamName}</span></div>`;
     }
 
     function changeMatchday(amount) {
@@ -1462,7 +1472,7 @@
 
             tr.innerHTML = `
                 <td><strong>${rank}.</strong></td>
-                <td><div style="display: flex; align-items: center; gap: 8px;">${logoHtml}<span>${s.name}</span></div></td>
+                <td><div style="display: flex; align-items: center; gap: 8px;">${logoHtml}<span class="clickable-team" onclick="openTeamMatchesModal('${s.name}')">${s.name}</span></div></td>
                 <td style="text-align: center;">${s.played}</td>
                 <td style="text-align: center;">${s.won}</td>
                 <td style="text-align: center;">${s.draw}</td>
@@ -1549,42 +1559,48 @@
         }
     }
 
-    function openMsvMatchesModal() {
+    function openTeamMatchesModal(teamName) {
+        document.getElementById('modalTeamTitle').textContent = `📅 ${teamName} — Alle Saisonspiele`;
         let modalBody = document.getElementById('msvMatchesModalBody');
         modalBody.innerHTML = '';
 
-        let msvMatches = [];
+        let teamMatches = [];
         for (let mDay in openLigaMatches) {
             let matchesArr = openLigaMatches[mDay];
             if (Array.isArray(matchesArr)) {
                 matchesArr.forEach(m => {
-                    if (m.home.includes("MSV Duisburg") || m.away.includes("MSV Duisburg")) {
-                        msvMatches.push(Object.assign({ matchday: parseInt(mDay) }, m));
+                    if (m.home === teamName || m.away === teamName) {
+                        teamMatches.push(Object.assign({ matchday: parseInt(mDay) }, m));
                     }
                 });
             }
         }
-        msvMatches.sort((a, b) => a.matchday - b.matchday);
+        teamMatches.sort((a, b) => a.matchday - b.matchday);
 
-        if (msvMatches.length === 0) {
+        if (teamMatches.length === 0) {
             modalBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Keine Spiele gefunden.</td></tr>`;
         } else {
-            msvMatches.forEach(m => {
+            teamMatches.forEach(m => {
                 let hasResult = m.homeScore !== undefined && m.homeScore !== null && m.awayScore !== undefined && m.awayScore !== null;
-                let isHome = m.home.includes("MSV Duisburg");
+                let isHome = m.home === teamName;
                 
                 let badgeClass = '';
                 if (hasResult) {
-                    let msvGoals = isHome ? m.homeScore : m.awayScore;
+                    let teamGoals = isHome ? m.homeScore : m.awayScore;
                     let oppGoals = isHome ? m.awayScore : m.homeScore;
 
-                    if (msvGoals > oppGoals) badgeClass = 'msv-badge-win';
-                    else if (msvGoals === oppGoals) badgeClass = 'msv-badge-draw';
+                    if (teamGoals > oppGoals) badgeClass = 'msv-badge-win';
+                    else if (teamGoals === oppGoals) badgeClass = 'msv-badge-draw';
                     else badgeClass = 'msv-badge-loss';
                 }
 
-                let homeDisplay = isHome ? `<span class="${badgeClass}">${m.home}</span>` : m.home;
-                let awayDisplay = !isHome ? `<span class="${badgeClass}">${m.away}</span>` : m.away;
+                let homeUrl = teamLogos[m.home.trim().toLowerCase()] || '';
+                let awayUrl = teamLogos[m.away.trim().toLowerCase()] || '';
+                let homeLogo = homeUrl ? `<img src="${homeUrl}" class="team-mini-logo" style="width:16px; height:16px;">` : '';
+                let awayLogo = awayUrl ? `<img src="${awayUrl}" class="team-mini-logo" style="width:16px; height:16px;">` : '';
+
+                let homeDisplay = isHome && hasResult ? `<span class="${badgeClass}">${m.home}</span> ${homeLogo}` : `${m.home} ${homeLogo}`;
+                let awayDisplay = !isHome && hasResult ? `${awayLogo} <span class="${badgeClass}">${m.away}</span>` : `${awayLogo} ${m.away}`;
 
                 let resultDisplay = hasResult ? `<strong>${m.homeScore}:${m.awayScore}</strong>` : `<span style="color:var(--text-muted);">-:-</span>`;
                 let formattedDate = m.date ? m.date.split('-').reverse().join('.') : 'Offen';
@@ -1593,9 +1609,9 @@
                 tr.innerHTML = `
                     <td style="text-align: center; color: var(--msv-bright-blue); font-weight: bold;">ST ${m.matchday}</td>
                     <td style="font-size: 0.8rem; color: var(--text-muted);">${formattedDate}</td>
-                    <td style="text-align: right;">${homeDisplay}</td>
+                    <td style="text-align: right;"><div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">${homeDisplay}</div></td>
                     <td style="text-align: center;">${resultDisplay}</td>
-                    <td>${awayDisplay}</td>
+                    <td><div style="display: flex; align-items: center; gap: 6px;">${awayDisplay}</div></td>
                 `;
                 modalBody.appendChild(tr);
             });
