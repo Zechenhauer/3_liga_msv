@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MSV 3. Liga — Live & Management</title>
+    <title>MSV Duisburg 3. Liga — Live & Management</title>
 
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23003399%22/><text x=%2250%22 y=%2265%22 font-size=%2255%22 text-anchor=%22middle%22>⚽</text></svg>">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23003399%22/><text x=%2250%22 y=%2265%22 font-size=%2255%22 text-anchor=%22middle%22>⚽</text></svg>">
@@ -11,12 +11,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg-color: #070b19;
-            --card-bg: #0d1428;
-            --card-inner: #131c38;
+            --bg-color: #050814;
+            --card-bg: #0b1124;
+            --card-inner: #101a36;
             --text-color: #f0f4f8;
             --text-muted: #8fa3bf;
-            --border-color: #1f305e;
+            --border-color: #1a2a54;
             --msv-blue: #003399;
             --msv-blue-hover: #0044cc;
             --msv-bright-blue: #388bfd;
@@ -41,14 +41,93 @@
             width: 100%;
             max-width: 1000px;
             background: var(--card-bg);
-            border: 1px solid rgba(56, 139, 253, 0.3);
+            border: 2px solid var(--msv-blue);
             border-radius: 20px;
             padding: 24px;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 51, 153, 0.2);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.9), 0 0 35px rgba(0, 51, 153, 0.35);
+        }
+
+        /* MSV LIVE LAUFBAND / TICKER */
+        .msv-ticker-wrapper {
+            background: linear-gradient(90deg, #001a4d 0%, var(--msv-blue) 40%, var(--msv-bright-blue) 80%, #001a4d 100%);
+            border: 1px solid var(--msv-gold);
+            border-radius: 12px;
+            padding: 10px 0;
+            margin-bottom: 20px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 6px 20px rgba(0, 51, 153, 0.6), inset 0 0 15px rgba(255, 215, 0, 0.25);
+            display: flex;
+            align-items: center;
+        }
+
+        .ticker-badge {
+            background: var(--msv-gold);
+            color: #070b19;
+            font-weight: 900;
+            font-size: 0.75rem;
+            padding: 5px 12px;
+            border-radius: 6px;
+            margin-left: 12px;
+            z-index: 10;
+            text-transform: uppercase;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .ticker-container {
+            overflow: hidden;
+            white-space: nowrap;
+            width: 100%;
+            position: relative;
+        }
+
+        .ticker-track {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marquee 95s linear infinite;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+        }
+
+        .ticker-track:hover {
+            animation-play-state: paused;
+        }
+
+        .ticker-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: 35px;
+            background: rgba(5, 8, 20, 0.45);
+            padding: 5px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        /* MSV-Highlight im Laufband */
+        .ticker-item span.msv-highlight {
+            color: var(--msv-gold);
+            font-weight: 900;
+            background: rgba(0, 51, 153, 0.6);
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--msv-bright-blue);
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
         }
 
         .banner-box {
-            background: #070b19;
+            background: #050814;
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 10px;
@@ -72,12 +151,12 @@
 
         .header-banner {
             background: linear-gradient(135deg, #0d1428 0%, #002060 100%);
-            border: 1px solid var(--msv-blue);
+            border: 2px solid var(--msv-blue);
             border-radius: 16px;
             padding: 24px;
             margin-bottom: 24px;
             text-align: center;
-            box-shadow: inset 0 0 25px rgba(56, 139, 253, 0.1), 0 8px 20px rgba(0,0,0,0.4);
+            box-shadow: inset 0 0 25px rgba(56, 139, 253, 0.15), 0 8px 20px rgba(0,0,0,0.4);
         }
 
         .title-row {
@@ -93,7 +172,7 @@
             width: 52px;
             height: 52px;
             object-fit: contain;
-            filter: drop-shadow(0 4px 10px rgba(56,139,253,0.3));
+            filter: drop-shadow(0 4px 10px rgba(56,139,253,0.4));
         }
 
         .trainer-logo {
@@ -235,7 +314,7 @@
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(7, 11, 25, 0.85);
+            background: rgba(5, 8, 20, 0.85);
             backdrop-filter: blur(8px);
             display: none;
             justify-content: center;
@@ -298,7 +377,7 @@
             .stats-grid-top { grid-template-columns: repeat(3, 1fr); }
         }
         .stat-card {
-            background: #131c38;
+            background: #101a36;
             border: 1px solid var(--border-color);
             border-radius: 10px;
             padding: 12px 6px;
@@ -327,7 +406,7 @@
             .stats-grid-bottom { grid-template-columns: 1fr; }
         }
         .stat-card-wide {
-            background: #131c38;
+            background: #101a36;
             border: 1px solid var(--border-color);
             border-radius: 10px;
             padding: 14px;
@@ -340,7 +419,7 @@
         }
 
         .form-row-box {
-            background: #131c38;
+            background: #101a36;
             border: 1px solid var(--border-color);
             border-radius: 10px;
             padding: 14px 18px;
@@ -376,7 +455,7 @@
             align-items: center;
             margin-bottom: 18px;
             font-size: 0.9rem;
-            background: #131c38;
+            background: #101a36;
             padding: 10px 16px;
             border-radius: 10px;
             border: 1px solid var(--border-color);
@@ -404,7 +483,7 @@
         }
 
         .match-card {
-            background: #131c38;
+            background: #101a36;
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 16px;
@@ -443,8 +522,8 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: #090e1f;
-            border: 1px solid #1b2850;
+            background: #050814;
+            border: 1px solid #1a2a54;
             border-radius: 8px;
             padding: 10px 14px;
             margin-bottom: 8px;
@@ -515,7 +594,7 @@
             font-size: 0.85rem;
         }
         th {
-            background-color: #131c38;
+            background-color: #101a36;
             color: var(--msv-bright-blue);
             padding: 14px 12px;
             text-transform: uppercase;
@@ -557,7 +636,7 @@
             flex-wrap: wrap;
         }
         .visitor-counter-badge {
-            background: #131c38;
+            background: #101a36;
             border: 1px solid var(--border-color);
             color: var(--text-color);
             padding: 8px 14px;
@@ -566,7 +645,7 @@
             font-weight: 700;
         }
         .chart-modal-btn {
-            background: #131c38;
+            background: #101a36;
             border: 1px solid var(--border-color);
             color: var(--text-color);
             padding: 8px 14px;
@@ -649,14 +728,14 @@
 
         .admin-box {
             display: none;
-            background: #090e1f;
+            background: #050814;
             border: 1px dashed var(--msv-bright-blue);
             border-radius: 10px;
             padding: 14px;
             margin-bottom: 15px;
         }
         .admin-box input, .admin-box select {
-            background: #131c38;
+            background: #101a36;
             border: 1px solid var(--border-color);
             color: var(--text-color);
             padding: 8px 12px;
@@ -704,6 +783,16 @@
 <body>
 
 <div class="container">
+    <!-- MSV LIVE LAUFBAND / TICKER -->
+    <div class="msv-ticker-wrapper">
+        <div class="ticker-badge" id="tickerBadgeText"><span>⚽ MSV-TICKER</span></div>
+        <div class="ticker-container">
+            <div class="ticker-track" id="tickerTrack">
+                <span class="ticker-item">Lade MSV Laufband...</span>
+            </div>
+        </div>
+    </div>
+
     <div class="banner-box">
         <img id="bannerSlideshow" src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/banner_msv.png" alt="MSV Diashow" class="banner-img">
     </div>
@@ -936,17 +1025,17 @@
             
             <div style="margin-bottom: 12px;">
                 <label style="font-size: 0.75rem; color: var(--text-muted); font-weight: bold; display: block; margin-bottom: 4px;">SPIELERNAME</label>
-                <input type="text" id="editPlayerName" style="width: 100%; background: #131c38; border: 1px solid var(--border-color); color: var(--text-color); padding: 10px; border-radius: 6px; font-size: 0.9rem;">
+                <input type="text" id="editPlayerName" style="width: 100%; background: #101a36; border: 1px solid var(--border-color); color: var(--text-color); padding: 10px; border-radius: 6px; font-size: 0.9rem;">
             </div>
 
             <div style="display: flex; gap: 10px; margin-bottom: 15px;">
                 <div style="flex: 1;">
                     <label style="font-size: 0.75rem; color: var(--text-muted); font-weight: bold; display: block; margin-bottom: 4px;">SPIELE (SP)</label>
-                    <input type="number" id="editPlayerSpiele" min="0" max="38" style="width: 100%; background: #131c38; border: 1px solid var(--border-color); color: var(--text-color); padding: 10px; border-radius: 6px; font-size: 0.9rem; text-align: center;">
+                    <input type="number" id="editPlayerSpiele" min="0" max="38" style="width: 100%; background: #101a36; border: 1px solid var(--border-color); color: var(--text-color); padding: 10px; border-radius: 6px; font-size: 0.9rem; text-align: center;">
                 </div>
                 <div style="flex: 1;">
                     <label style="font-size: 0.75rem; color: var(--text-muted); font-weight: bold; display: block; margin-bottom: 4px;">TORE</label>
-                    <input type="number" id="editPlayerTore" min="0" max="50" style="width: 100%; background: #131c38; border: 1px solid var(--border-color); color: var(--text-color); padding: 10px; border-radius: 6px; font-size: 0.9rem; text-align: center;">
+                    <input type="number" id="editPlayerTore" min="0" max="50" style="width: 100%; background: #101a36; border: 1px solid var(--border-color); color: var(--text-color); padding: 10px; border-radius: 6px; font-size: 0.9rem; text-align: center;">
                 </div>
             </div>
         </div>
@@ -1289,6 +1378,51 @@
         }
 
         renderAll();
+        updateTicker(false);
+    }
+
+    function updateTicker(hasLiveMatches) {
+        let tickerTrack = document.getElementById('tickerTrack');
+        let tickerBadge = document.getElementById('tickerBadgeText');
+        let tickerItems = [];
+
+        if (hasLiveMatches) {
+            tickerBadge.innerHTML = `<span>🔴 LIVE-TICKER</span>`;
+            Object.values(openLigaMatches).forEach(matchList => {
+                matchList.forEach(m => {
+                    if (m.isLive) {
+                        let hScore = m.homeScore !== null ? m.homeScore : 0;
+                        let aScore = m.awayScore !== null ? m.awayScore : 0;
+                        let hTeam = m.home.includes("MSV Duisburg") ? `<span class="msv-highlight">${m.home}</span>` : m.home;
+                        let aTeam = m.away.includes("MSV Duisburg") ? `<span class="msv-highlight">${m.away}</span>` : m.away;
+                        tickerItems.push(`<span class="ticker-item">⚡ [LIVE] ${hTeam} ${hScore}:${aScore} ${aTeam}</span>`);
+                    }
+                });
+            });
+        } else {
+            tickerBadge.innerHTML = `<span>⚽ SPIELTAG ${currentMatchday}</span>`;
+            let currentMatches = openLigaMatches[currentMatchday] || [];
+            if (currentMatches.length > 0) {
+                currentMatches.forEach(m => {
+                    let hScore = m.homeScore !== null ? m.homeScore : '-';
+                    let aScore = m.awayScore !== null ? m.awayScore : '-';
+                    let statusLabel = m.isFinished ? 'ENDE' : (m.time || '14:00');
+                    
+                    let hTeam = m.home.includes("MSV Duisburg") ? `<span class="msv-highlight">${m.home}</span>` : m.home;
+                    let aTeam = m.away.includes("MSV Duisburg") ? `<span class="msv-highlight">${m.away}</span>` : m.away;
+
+                    tickerItems.push(`<span class="ticker-item">📅 [${statusLabel}] ${hTeam} ${hScore}:${aScore} ${aTeam}</span>`);
+                });
+            } else {
+                tickerItems.push(`<span class="ticker-item">⚽ MSV Duisburg — Bereit für die 3. Liga Saison 2026/27!</span>`);
+            }
+        }
+
+        if (tickerItems.length > 0) {
+            tickerTrack.innerHTML = tickerItems.join('');
+        } else {
+            tickerTrack.innerHTML = `<span class="ticker-item">⚽ MSV Duisburg — Live-Tabelle & Ergebnisse</span>`;
+        }
     }
 
     function populateTeamSelect() {
@@ -1376,6 +1510,7 @@
         renderMatchdayCards();
         renderTable();
         renderMsvStats();
+        updateTicker(false);
     }
 
     async function renderMatchdayCards() {
