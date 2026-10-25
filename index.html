@@ -111,7 +111,6 @@
             border: 1px solid rgba(255, 215, 0, 0.3);
         }
 
-        /* MSV-Highlight im Laufband */
         .ticker-item span.msv-highlight {
             color: var(--msv-gold);
             font-weight: 900;
@@ -793,18 +792,19 @@
         </div>
     </div>
 
+    <!-- SLIDESHOW BANNER -->
     <div class="banner-box">
-        <img id="bannerSlideshow" src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/banner_msv.png" alt="MSV Diashow" class="banner-img">
+        <img id="bannerSlideshow" src="https://raw.githubusercontent.com/Zechenhauer/3_liga_msv/main/banner_msv.png" alt="MSV Diashow" class="banner-img">
     </div>
 
     <!-- HEADER BANNER -->
     <div class="header-banner">
         <div class="title-row">
-            <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos%202te%20liga/Dietmar%20Hirsch.png" alt="Dietmar Hirsch" class="trainer-logo" title="Trainer Dietmar Hirsch">
-            <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/msv%20logo.png" alt="MSV Logo" class="club-logo">
+            <img src="https://raw.githubusercontent.com/Zechenhauer/3_liga_msv/main/Dietmar%20Hirsch.png" alt="Dietmar Hirsch" class="trainer-logo" title="Trainer Dietmar Hirsch">
+            <img src="https://raw.githubusercontent.com/Zechenhauer/3_liga_msv/main/msv%20logo.png" alt="MSV Logo" class="club-logo">
             <h2>MSV Duisburg <span>3. Liga</span></h2>
-            <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/msv%20logo.png" alt="MSV Logo" class="club-logo">
-            <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos%202te%20liga/Dietmar%20Hirsch.png" alt="Dietmar Hirsch" class="trainer-logo" title="Trainer Dietmar Hirsch">
+            <img src="https://raw.githubusercontent.com/Zechenhauer/3_liga_msv/main/msv%20logo.png" alt="MSV Logo" class="club-logo">
+            <img src="https://raw.githubusercontent.com/Zechenhauer/3_liga_msv/main/Dietmar%20Hirsch.png" alt="Dietmar Hirsch" class="trainer-logo" title="Trainer Dietmar Hirsch">
         </div>
         <div class="subtitle">Saison 2026/27 (Mit OpenLigaDB Live-Sync & Liga-Toren)</div>
         <div class="meta-info">
@@ -1076,12 +1076,14 @@
     let previousScores = JSON.parse(localStorage.getItem('msv_previous_scores_v3') || '{}');
     let isInitialLoad = true;
 
+    // Alle Slideshow-Bilder jetzt auf GitHub-Raw umgestellt
     const msvBannerImages = [
-        "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/banner_msv.png",
-        "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/msv04.png",
-        "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/msv_01.png",
-        "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/msv_02.png",
-        "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/msv_03.png"
+        "https://raw.githubusercontent.com/Zechenhauer/3_liga_msv/main/banner_msv.png",
+        "https://raw.githubusercontent.com/Zechenhauer/3_liga_msv/main/msv%20wahnsinn.png",
+        "https://raw.githubusercontent.com/Zechenhauer/3_liga_msv/main/msv04.png",
+        "https://raw.githubusercontent.com/Zechenhauer/3_liga_msv/main/msv_01.png",
+        "https://raw.githubusercontent.com/Zechenhauer/3_liga_msv/main/msv_02.png",
+        "https://raw.githubusercontent.com/Zechenhauer/3_liga_msv/main/msv_03.png"
     ];
     let currentBannerIndex = 0;
 
